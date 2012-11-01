@@ -23,8 +23,8 @@ Get the repo and build it from the command line:
 
 Download the repo as a [zip][6] and unzip it.
 [Remove the NTFS Alternate Data Streams][7] from the unzipped contents
-- if not removed then PowerShell will not execute the build scripts.
-Run the `psake.cmd` file in the `build` folder.
+(PowerShell will not execute the build scripts downloaded from the
+interwebs). Run the `psake.cmd` file in the `build` folder.
 
 ## License
 
