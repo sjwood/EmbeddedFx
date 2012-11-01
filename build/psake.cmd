@@ -1,6 +1,10 @@
 @ECHO OFF
 
 
+REM Set environment variables
+SET PSAKE_VERSION=4.1.0
+
+
 REM Check for PoSh v2 (or greater)
 IF NOT EXIST %WINDIR%\System32\WindowsPowerShell\v1.0\powershell.exe (
 	SET EXITCODE=1
@@ -14,10 +18,10 @@ IF %EXITCODE% GTR 0 (
 
 
 REM Run psake
-SET PSAKE_VERSION=4.1.0
-SET PSAKE_DIRECTORY=..\tools\psake\%PSAKE_VERSION%
-Powershell -Version 2.0 -Command "& { $CurrentExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser; if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; } %PSAKE_DIRECTORY%\psake.ps1 %*; if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) { Set-ExecutionPolicy -Scope CurrentUser $CurrentExecutionPolicy; } if ($psake.build_success -eq $False) { Exit 1; } Exit 0; }"
+PUSHD %~dp0
+Powershell -Version 2.0 -Command "& { $CurrentExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser; if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; } ..\tools\psake\%PSAKE_VERSION%\psake.ps1 %*; if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) { Set-ExecutionPolicy -Scope CurrentUser $CurrentExecutionPolicy; } if ($psake.build_success -eq $False) { Exit 1; } Exit 0; }"
 SET EXITCODE=%ERRORLEVEL%
+POPD
 GOTO END
 
 
