@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmbeddedFx", "..\src\EmbeddedFx.csproj", "{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}.Release|AnyCPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -15,8 +15,40 @@
 
 Set-StrictMode -Version Latest
 
-Task default -Depends ShowMessage
 
-Task ShowMessage -Description "Displays a simple test message" {
-    Write-Host -Fore magenta "Hi from psake"
+Properties {
+    $Configuration = "Debug"
+    $Platform = "AnyCPU"
+}
+
+
+$Framework = '4.0'
+$RootDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList ".."
+$ObjectDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\obj"
+$BinariesDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\bin"
+$DocumentationDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\doc"
+
+
+$Solutions = Get-ChildItem $RootDirectory.FullName -Include *.sln -Recurse
+
+
+Task default -Depends Build
+
+
+Task Clean -Description "Cleans all build products" {
+    $Directories = @($ObjectDirectory, $BinariesDirectory, $DocumentationDirectory)
+    :DirectoryLoop foreach ($Directory in $Directories) {
+        if ($Directory.Exists)
+        {
+            Write-Output ("  Removing directory '" + $Directory.FullName + "'")
+            Remove-Item $Directory.FullName -Force -Recurse
+        }
+    }
+}
+
+Task Build -Depends Clean -Description "Builds all code" {
+    :SolutionLoop foreach ($Solution in $Solutions) {
+        Write-Output ("  Building solution '" + $Solution.FullName + "'")
+        Exec { MsBuild $Solution.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
+    }
 }
