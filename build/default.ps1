@@ -33,11 +33,12 @@ $AllowedConfigurations = @("Debug", "Release")
 $AllowedPlatforms = @("AnyCPU")
 
 
-$Framework = '4.0'
+Framework "4.0"
+
+
 $RootDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList ".."
 $ObjectDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\obj"
 $BinariesDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\bin"
-$DocumentationDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList "$RootDirectory\doc"
 
 
 $Solutions = Get-ChildItem $RootDirectory.FullName -Include *.sln -Recurse
@@ -47,7 +48,7 @@ Task default -Depends Build
 
 
 Task Clean -Description "Cleans all build products" {
-    $Directories = @($ObjectDirectory, $BinariesDirectory, $DocumentationDirectory)
+    $Directories = @($ObjectDirectory, $BinariesDirectory)
     :DirectoryLoop foreach ($Directory in $Directories) {
         if ($Directory.Exists)
         {
