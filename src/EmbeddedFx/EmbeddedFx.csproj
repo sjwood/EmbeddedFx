@@ -3,6 +3,14 @@
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
+  <!-- Defaults -->
+  <PropertyGroup>
+    <RootDirectory Condition="'$(RootDirectory)' == ''">..\..</RootDirectory>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.41.0</StyleCopVersion>
+  </PropertyGroup>
+
   <!-- Common properties -->
   <PropertyGroup>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
@@ -14,15 +22,10 @@
     <OutputType>Library</OutputType>
     <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
     <RootNamespace>$(AssemblyName)</RootNamespace>
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <!-- Defaults -->
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
   </PropertyGroup>
 
   <!-- Debug build properties -->
@@ -49,7 +52,8 @@
 
   <!-- Imported MSBuild targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
+  <Import Project="$(RootDirectory)\tools\StyleCop\$(StyleCopVersion)\MSBuild\StyleCop.targets" />
+  
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

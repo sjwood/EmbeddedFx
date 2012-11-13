@@ -3,3 +3,4 @@ doc/
 obj/
 *.suo
 *.sln.cache
+StyleCop.Cache
