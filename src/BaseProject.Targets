@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  
+  <!-- Define Default properties -->
+  <PropertyGroup>
+    <RootDirectory>$(MSBuildThisFileDirectory)\..</RootDirectory>
+    <ObjDirectory>$(RootDirectory)\obj</ObjDirectory>
+    <BinDirectory>$(RootDirectory)\bin</BinDirectory>
+    <ToolsDirectory>$(RootDirectory)\tools</ToolsDirectory>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.41.0</StyleCopVersion>
+    <XunitVersion Condition="'$(XunitVersion)' == ''">1.9.1</XunitVersion>
+  </PropertyGroup>
+
+  <!-- Define project properties -->
+  <PropertyGroup>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <IntermediateOutputPath>$(ObjDirectory)\$(SolutionName)\$(AssemblyName)</IntermediateOutputPath>
+    <OutputPath>$(BinDirectory)\$(SolutionName)\$(AssemblyName)</OutputPath>
+    <RootNamespace>$(AssemblyName)</RootNamespace>
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  
+  <!-- Define Debug build properties -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>DEBUG</DefineConstants>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <!-- Define Release build properties -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <!-- Import MSBuild targets -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(ToolsDirectory)\StyleCop\$(StyleCopVersion)\MSBuild\StyleCop.targets" />
+
+</Project>

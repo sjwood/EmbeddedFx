@@ -1,58 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-
-  <!-- Defaults -->
   <PropertyGroup>
-    <RootDirectory Condition="'$(RootDirectory)' == ''">..\..</RootDirectory>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
-    <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.41.0</StyleCopVersion>
-  </PropertyGroup>
-
-  <!-- Common properties -->
-  <PropertyGroup>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <AssemblyName>EmbeddedFx</AssemblyName>
-    <ErrorReport>prompt</ErrorReport>
-    <FileAlignment>512</FileAlignment>
-    <IntermediateOutputPath>..\..\obj\$(SolutionName)\$(AssemblyName)</IntermediateOutputPath>
-    <OutputPath>..\..\bin\$(SolutionName)\$(AssemblyName)</OutputPath>
-    <OutputType>Library</OutputType>
     <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
-    <RootNamespace>$(AssemblyName)</RootNamespace>
-    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningLevel>4</WarningLevel>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
-  <!-- Debug build properties -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG</DefineConstants>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
-
-  <!-- Release build properties -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
+  <Import Project="..\BaseProject.Targets" />
 
   <!-- Source code -->
   <ItemGroup>
     <Compile Include="EmbeddedAssemblyLoader.cs" />
   </ItemGroup>
-
-  <!-- Imported MSBuild targets -->
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(RootDirectory)\tools\StyleCop\$(StyleCopVersion)\MSBuild\StyleCop.targets" />
   
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
