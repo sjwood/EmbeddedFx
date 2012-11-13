@@ -3,14 +3,16 @@
   
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   
-  <!-- Define Default properties -->
+  <!-- Define Location properties -->
   <PropertyGroup>
     <RootDirectory>$(MSBuildThisFileDirectory)\..</RootDirectory>
     <ObjDirectory>$(RootDirectory)\obj</ObjDirectory>
     <BinDirectory>$(RootDirectory)\bin</BinDirectory>
     <ToolsDirectory>$(RootDirectory)\tools</ToolsDirectory>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+  </PropertyGroup>
+
+  <!-- Define Tooling version properties -->
+  <PropertyGroup>
     <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.41.0</StyleCopVersion>
     <XunitVersion Condition="'$(XunitVersion)' == ''">1.9.1</XunitVersion>
   </PropertyGroup>
