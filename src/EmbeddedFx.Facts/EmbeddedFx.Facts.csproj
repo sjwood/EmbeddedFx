@@ -3,6 +3,7 @@
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
 
+  <!-- Common properties -->
   <PropertyGroup>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <AssemblyName>EmbeddedFx.Facts</AssemblyName>
@@ -18,12 +19,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
+  <!-- Defaults -->
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
-    <xUnitVersion Condition="'$(xUnitVersion)' == ''">1.9.1</xUnitVersion>
+    <XunitVersion Condition="'$(XunitVersion)' == ''">1.9.1</XunitVersion>
   </PropertyGroup>
 
+  <!-- Debug build properties -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
     <DebugType>full</DebugType>
@@ -32,6 +35,7 @@
     <Optimize>false</Optimize>
   </PropertyGroup>
 
+  <!-- Release build properties -->
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <DebugType>none</DebugType>
@@ -39,10 +43,12 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
+  <!-- Source code -->
   <ItemGroup>
     <Compile Include="Class1.cs" />
   </ItemGroup>
 
+  <!-- Imported MSBuild targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
