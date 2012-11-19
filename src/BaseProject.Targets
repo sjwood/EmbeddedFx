@@ -13,7 +13,7 @@
 
   <!-- Define Tooling version properties -->
   <PropertyGroup>
-    <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.41.0</StyleCopVersion>
+    <StyleCopVersion Condition="'$(StyleCopVersion)' == ''">4.7.42.0</StyleCopVersion>
     <XunitVersion Condition="'$(XunitVersion)' == ''">1.9.1</XunitVersion>
   </PropertyGroup>
 
