@@ -26,6 +26,7 @@
     <OutputPath>$(BinDirectory)\$(SolutionName)\$(AssemblyName)</OutputPath>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+    <StyleCopOverrideSettingsFile>Settings.StyleCop</StyleCopOverrideSettingsFile>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
