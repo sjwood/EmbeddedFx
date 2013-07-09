@@ -9,6 +9,13 @@
 
   <Import Project="..\BaseProject.Targets" />
 
+  <!-- References -->
+  <ItemGroup>
+    <Reference Include="xunit">
+      <HintPath>..\..\tools\xunit\$(XunitVersion)\xunit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
   <!-- Source code -->
   <ItemGroup>
     <Compile Include="Class1.cs" />

@@ -1,4 +1,4 @@
-# Copyright 2012 Steve Wood
+# Copyright 2012-2013 Steve Wood
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ Set-StrictMode -Version Latest
 Properties {
     $Configuration = "Debug"
     $Platform = "AnyCPU"
+    $XunitVersion = "1.9.1"
 }
 
 
@@ -44,7 +45,7 @@ $BinariesDirectory = New-Object -TypeName System.IO.DirectoryInfo -ArgumentList 
 $Solutions = Get-ChildItem $RootDirectory.FullName -Include *.sln -Recurse
 
 
-Task default -Depends Build
+Task default -Depends Test
 
 
 Task Clean -Description "Cleans all build products" {
@@ -91,5 +92,15 @@ Task Build -Depends ValidateProperties, Clean -Description "Builds all code" {
     :SolutionLoop foreach ($Solution in $Solutions) {
         Write-Output ("  Building solution '" + $Solution.FullName + "'")
         Exec { MsBuild $Solution.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
+    }
+}
+
+Task Test -Depends Build -Description "Runs all tests" {
+    $XunitConsoleExe = $RootDirectory.FullName + "\tools\xunit\$XunitVersion\xunit.console.exe"
+
+    $FactBinaries = $BinariesDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories)
+
+    :FactBinaryLoop foreach ($FactBinary in $FactBinaries) {
+        Exec { & $XunitConsoleExe $FactBinary.FullName }
     }
 }
