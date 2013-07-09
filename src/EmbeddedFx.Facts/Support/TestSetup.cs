@@ -1,4 +1,4 @@
-﻿// Copyright 2012 Steve Wood
+﻿// Copyright 2013 Steve Wood
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,20 @@
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1634:FileHeaderMustShowCopyright", Justification = "Documentation ignored at present time.")]
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1639:FileHeaderMustHaveSummary", Justification = "Documentation ignored at present time.")]
 
-namespace EmbeddedFx.Facts
+namespace EmbeddedFx.Facts.Support
 {
-    public class Class1
+    using System;
+
+    internal sealed class TestSetup
     {
+        public TestSetup(AppDomain parentAppDomain, AppDomain testAppDomain)
+        {
+            this.ParentAppDomain = parentAppDomain;
+            this.TestAppDomain = testAppDomain;
+        }
+
+        public AppDomain ParentAppDomain { get; private set; }
+
+        public AppDomain TestAppDomain { get; private set; }
     }
 }

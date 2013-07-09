@@ -9,7 +9,20 @@
 
   <Import Project="..\BaseProject.Targets" />
 
-  <!-- References -->
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="..\EmbeddedFx\EmbeddedFx.csproj">
+      <Project>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</Project>
+      <Name>EmbeddedFx</Name>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- GAC References -->
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+
+  <!-- Private Assembly References -->
   <ItemGroup>
     <Reference Include="xunit">
       <HintPath>..\..\tools\xunit\$(XunitVersion)\xunit.dll</HintPath>
@@ -18,7 +31,13 @@
 
   <!-- Source code -->
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="GivenAnEmbeddedAssemblyLoader.cs" />
+    <Compile Include="Support\ActOnObject.cs" />
+    <Compile Include="Support\AppDomainInfoProvider.cs" />
+    <Compile Include="Support\CSharpCompiler.cs" />
+    <Compile Include="Support\IsolatedStorageWrapper.cs" />
+    <Compile Include="Support\TestAppDomain.cs" />
+    <Compile Include="Support\TestSetup.cs" />
   </ItemGroup>
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
