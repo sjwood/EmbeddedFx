@@ -25,12 +25,9 @@ namespace EmbeddedFx.Facts
 
     public class GivenAnEmbeddedAssemblyLoader
     {
-        //// TODO
-        //// what happens if I call Dispose multiple times on the isolatedstoragewrapper????
-
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyDoesNotReferToEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
+        public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
         {
             Action<TestSetup> testSetup = (ts) =>
             {
@@ -64,7 +61,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyInstantiatesEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
+        public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
         {
             Action<TestSetup> testSetup = (ts) =>
                 {
@@ -107,23 +104,23 @@ namespace EmbeddedFx.Facts
 
         private void ExecuteTestInsideTestAppDomain(Action<TestSetup> action)
         {
-            IsolatedStorageWrapper storageWrapper = null;
+            IsolatedStorageWrapper isolatedStorageWrapper = null;
             TestAppDomain testAppDomain = null;
 
             try
             {
-                storageWrapper = new IsolatedStorageWrapper(IsolatedStorageFile.GetUserStoreForAssembly());
+                isolatedStorageWrapper = new IsolatedStorageWrapper(IsolatedStorageFile.GetUserStoreForAssembly());
 
-                this.CopyExecutingAssemblyTo(storageWrapper.StorageDirectory);
+                this.CopyExecutingAssemblyTo(isolatedStorageWrapper.StorageDirectory);
 
-                testAppDomain = new TestAppDomain(storageWrapper.StorageDirectory);
+                testAppDomain = new TestAppDomain(isolatedStorageWrapper.StorageDirectory);
 
                 action(new TestSetup(AppDomain.CurrentDomain, testAppDomain.AppDomain));
             }
             finally
             {
                 ActOnObject.IfNotNull(testAppDomain, (tad) => tad.Unload());
-                ActOnObject.IfNotNull(storageWrapper, (sw) => sw.Remove());
+                ActOnObject.IfNotNull(isolatedStorageWrapper, (sw) => sw.Remove());
             }
         }
 
