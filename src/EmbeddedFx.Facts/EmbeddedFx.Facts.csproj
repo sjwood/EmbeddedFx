@@ -25,7 +25,7 @@
   <!-- Private Assembly References -->
   <ItemGroup>
     <Reference Include="xunit">
-      <HintPath>..\..\tools\xunit\$(XunitVersion)\xunit.dll</HintPath>
+      <HintPath>..\..\tools\Xunit\$(XunitVersion)\xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
 

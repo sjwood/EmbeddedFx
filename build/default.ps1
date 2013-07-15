@@ -66,7 +66,7 @@ Task Build -Depends ValidateProperties, Clean, InstantiateBuildHelper -Descripti
 
 
 Task Test -Depends Build, InstantiateBuildHelper -Description "Runs all tests" {
-    $XunitConsoleExe = [System.IO.Path]::Combine($Global:BuildHelper.GetToolDirectory("xunit").FullName, "xunit.console.exe")
+    $XunitConsoleExe = [System.IO.Path]::Combine($Global:BuildHelper.GetToolDirectory("Xunit").FullName, "xunit.console.exe")
     $TestFiles = $Global:BuildHelper.GetTestFiles()
     :TestFileLoop foreach ($TestFile in $TestFiles) {
         Exec { & $XunitConsoleExe $TestFile.FullName }
@@ -117,21 +117,11 @@ Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" 
 
             public IEnumerable<FileInfo> GetTestFiles()
             {
-                if (!this.BinariesDirectory.Exists)
-                {
-                    throw new Exception(string.Format(""Binaries directory '{0}' does not exist!"", this.BinariesDirectory.FullName));
-                }
-
                 return this.BinariesDirectory.GetFiles(""*.Facts.dll"", SearchOption.AllDirectories);
             }
 
             public IEnumerable<FileInfo> GetSolutionFiles()
             {
-                if (!this.SolutionDirectory.Exists)
-                {
-                    throw new Exception(string.Format(""Solution directory '{0}' does not exist!"", this.SolutionDirectory.FullName));
-                }
-
                 return this.SolutionDirectory.GetFiles(""*.sln"", SearchOption.TopDirectoryOnly);
             }
 
