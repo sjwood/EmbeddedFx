@@ -45,7 +45,7 @@ if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSi
 { ^
   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; ^
 } ^
-..\tools\psake\%PSAKE_VERSION%\psake.ps1 %*; ^
+.\Psake\%PSAKE_VERSION%\psake.ps1 %*; ^
 if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) ^
 { ^
   Set-ExecutionPolicy -Scope CurrentUser $CurrentExecutionPolicy; ^
