@@ -74,6 +74,52 @@ Task Test -Depends Build, InstantiateBuildHelper -Description "Runs all tests" {
 }
 
 
+Task EmitMSBuildProperties -Description "Create .props files with appropriate MSBuild properties" {
+    $CurrentDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "."
+    :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $CurrentDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly)) {
+        Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
+        $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
+        $MSBuildPropertyFileInfo.Delete()
+    }
+
+    $MSBuildProperties = @()
+
+    $MSBuildProperties += ,("ObjDirectory", (New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName)
+    $MSBuildProperties += ,("BinDirectory", (New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName)
+
+    $ToolsDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\tools"
+    :ToolDirectoryLoop foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly)) {
+        $CurrentVersionDirectory = $Null
+        :VersionDirectoryLoop foreach ($VersionDirectory in $ToolDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly)) {
+            if ($CurrentVersionDirectory -eq $Null -or $VersionDirectory.Name -gt $CurrentVersionDirectory.Name)
+            {
+                $CurrentVersionDirectory = $VersionDirectory
+            }
+        }
+        if ($CurrentVersionDirectory -ne $Null)
+        {
+            $MSBuildProperties += ,(($ToolDirectory.Name + "Directory"), $CurrentVersionDirectory.FullName)
+        }
+    }
+
+    :MSBuildPropertyLoop foreach ($MSBuildProperty in $MSBuildProperties) {
+        $MSBuildPropertyFileInfo = New-Object System.IO.FileInfo -ArgumentList (".\" + $MSBuildProperty[0] + ".props")
+        Write-Output ("  Creating '" + $MSBuildPropertyFileInfo.FullName + "'")
+        $XmlWriter = New-Object System.Xml.XmlTextWriter $MSBuildPropertyFileInfo.FullName, ([System.Text.Encoding]::UTF8)
+        $XmlWriter.Formatting = [System.Xml.Formatting]::Indented
+        $XmlWriter.Indentation = 4
+        $XmlWriter.WriteStartDocument()
+        $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
+        $XmlWriter.WriteStartElement("PropertyGroup")
+        $XmlWriter.WriteElementString($MSBuildProperty[0], $MSBuildProperty[1])
+        $XmlWriter.WriteEndElement()
+        $XmlWriter.WriteEndElement()
+        $XmlWriter.WriteEndDocument()
+        $XmlWriter.Close()
+    }
+}
+
+
 Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" {
 
     $BuildHelperType = "

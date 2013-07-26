@@ -1,5 +1,5 @@
 bin/
-doc/
+build/*.props
 obj/
 *.suo
 *.sln.cache
