@@ -14,4 +14,8 @@
     <Compile Include="EmbeddedAssemblyLoader.cs" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PreBuildEvent>$(SolutionDir)..\build\psake.cmd EmitMSBuildProperties</PreBuildEvent>
+  </PropertyGroup>
+
 </Project>
