@@ -93,19 +93,30 @@ Task Clean -Depends InstantiateBuildHelper -Description "Cleans all build produc
 }
 
 
-Task ValidateProperties -Depends InstantiateBuildHelper -Description "Validates script properties" {
-    if ($Global:BuildHelper.IsConfigurationAllowed($Configuration) -eq $False)
+Task ValidateProperties -Description "Validates script properties" {
+    $ConfigurationIsValid = IsValueInSet $Configuration $Global:AllowedConfigurations
+    if ($ConfigurationIsValid -eq $False)
     {
-        Throw "'$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
+        Write-Warning "  '$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
     }
-    if ($Global:BuildHelper.IsPlatformAllowed($Platform) -eq $False)
+    $PlatformIsValid = IsValueInSet $Platform $Global:AllowedPlatforms
+    if ($PlatformIsValid -eq $False)
     {
-        Throw "'$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
+        Write-Warning "  '$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
+    }
+    if ($ConfigurationIsValid -eq $False -Or $PlatformIsValid -eq $False)
+    {
+        Throw "Either the build Configuration or Platform is invalid."
     }
 }
 
 
-Task Build -Depends ValidateProperties, CreateMSBuildProperties, Clean, InstantiateBuildHelper -Description "Builds all source code" {
+Task ReportProperties -Depends ValidateProperties -Description "Reports script properties" {
+    Write-Output ("  Building with Configuration: '$Configuration' and Platform: '$Platform'")
+}
+
+
+Task Build -Depends ReportProperties, CreateMSBuildProperties, Clean, InstantiateBuildHelper -Description "Builds all source code" {
     $SolutionFiles = $Global:BuildHelper.GetSolutionFiles()
     :SolutionFileLoop foreach ($SolutionFile in $SolutionFiles) {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
@@ -136,8 +147,6 @@ Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" 
         {
             public Helper(string[] allowedConfigurations, string[] allowedPlatforms)
             {
-                this.AllowedConfigurations = new List<string>(allowedConfigurations);
-                this.AllowedPlatforms = new List<string>(allowedPlatforms);
                 this.SetDirectories();
                 this.DiscoverTooling();
             }
@@ -182,16 +191,6 @@ Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" 
                 }
 
                 return this.Tools[toolName];
-            }
-
-            public bool IsConfigurationAllowed(string configuration)
-            {
-                return this.AllowedConfigurations.Contains(configuration);
-            }
-
-            public bool IsPlatformAllowed(string platform)
-            {
-                return this.AllowedPlatforms.Contains(platform);
             }
 
             private void DiscoverTooling()
@@ -240,4 +239,15 @@ Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" 
     Add-Type -TypeDefinition $BuildHelperType -Language CSharpVersion3
 
     $Global:BuildHelper = New-Object -TypeName Build.Helper -ArgumentList $Global:AllowedConfigurations, $Global:AllowedPlatforms
+}
+
+
+function IsValueInSet([string] $Value, [string[]] $Set) {
+    :SetItemLoop foreach ($SetItem in $Set) {
+        if ($Value -eq $SetItem)
+        {
+            return $True
+        }
+    }
+    return $False
 }
