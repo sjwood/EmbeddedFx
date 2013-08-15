@@ -17,7 +17,7 @@ his book [CLR via C#][4].
 Get the repo and build it from the command line:
 
 	"C:\Program Files\Git\bin\git.exe" clone https://github.com/sjwood/EmbeddedFx.git
-	.\EmbeddedFx\build\psake.cmd
+	.\EmbeddedFx\build\build.cmd
 
 ### The slightly-more-work way
 
