@@ -1,21 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+  <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+
   <PropertyGroup>
     <AssemblyName>EmbeddedFx</AssemblyName>
-    <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
   </PropertyGroup>
 
-  <Import Project="..\BaseProject.Targets" />
+  <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
 
-  <!-- Source code -->
   <ItemGroup>
     <Compile Include="EmbeddedAssemblyLoader.cs" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)..\build\psake.cmd EmitMSBuildProperties</PreBuildEvent>
-  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
 
 </Project>

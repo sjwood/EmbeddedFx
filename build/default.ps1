@@ -39,49 +39,17 @@ Framework "4.0"
 Task default -Depends Test
 
 
-Task Clean -Depends InstantiateBuildHelper -Description "Cleans all build products" {
-    $Global:BuildHelper.Clean()
-}
-
-
-Task ValidateProperties -Depends InstantiateBuildHelper -Description "Validates script properties" {
-    if ($Global:BuildHelper.IsConfigurationAllowed($Configuration) -eq $False)
-    {
-        Throw "'$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
-    }
-    if ($Global:BuildHelper.IsPlatformAllowed($Platform) -eq $False)
-    {
-        Throw "'$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
-    }
-}
-
-
-Task Build -Depends ValidateProperties, Clean, InstantiateBuildHelper -Description "Builds all code" {
-    $SolutionFiles = $Global:BuildHelper.GetSolutionFiles()
-    :SolutionFileLoop foreach ($SolutionFile in $SolutionFiles) {
-        Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
-        Exec { MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
-    }
-}
-
-
-Task Test -Depends Build, InstantiateBuildHelper -Description "Runs all tests" {
-    $XunitConsoleExe = [System.IO.Path]::Combine($Global:BuildHelper.GetToolDirectory("Xunit").FullName, "xunit.console.exe")
-    $TestFiles = $Global:BuildHelper.GetTestFiles()
-    :TestFileLoop foreach ($TestFile in $TestFiles) {
-        Exec { & $XunitConsoleExe $TestFile.FullName }
-    }
-}
-
-
-Task EmitMSBuildProperties -Description "Create .props files with appropriate MSBuild properties" {
+Task CleanMSBuildProperties -Description "Delete all generated MSBuild property files" {
     $CurrentDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "."
     :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $CurrentDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly)) {
         Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
         $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
         $MSBuildPropertyFileInfo.Delete()
     }
+}
 
+
+Task CreateMSBuildProperties -Depends CleanMSBuildProperties -Description "Creates all generated MSBuild property files" {
     $MSBuildProperties = @()
 
     $MSBuildProperties += ,("ObjDirectory", (New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName)
@@ -111,11 +79,46 @@ Task EmitMSBuildProperties -Description "Create .props files with appropriate MS
         $XmlWriter.WriteStartDocument()
         $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
         $XmlWriter.WriteStartElement("PropertyGroup")
-        $XmlWriter.WriteElementString($MSBuildProperty[0], $MSBuildProperty[1])
+        $XmlWriter.WriteElementString($MSBuildProperty[0], $MSBuildProperty[1] + "\")
         $XmlWriter.WriteEndElement()
         $XmlWriter.WriteEndElement()
         $XmlWriter.WriteEndDocument()
         $XmlWriter.Close()
+    }
+}
+
+
+Task Clean -Depends InstantiateBuildHelper -Description "Cleans all build products" {
+    $Global:BuildHelper.Clean()
+}
+
+
+Task ValidateProperties -Depends InstantiateBuildHelper -Description "Validates script properties" {
+    if ($Global:BuildHelper.IsConfigurationAllowed($Configuration) -eq $False)
+    {
+        Throw "'$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
+    }
+    if ($Global:BuildHelper.IsPlatformAllowed($Platform) -eq $False)
+    {
+        Throw "'$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
+    }
+}
+
+
+Task Build -Depends ValidateProperties, CreateMSBuildProperties, Clean, InstantiateBuildHelper -Description "Builds all source code" {
+    $SolutionFiles = $Global:BuildHelper.GetSolutionFiles()
+    :SolutionFileLoop foreach ($SolutionFile in $SolutionFiles) {
+        Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
+        Exec { MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
+    }
+}
+
+
+Task Test -Depends Build, InstantiateBuildHelper -Description "Runs all tests" {
+    $XunitConsoleExe = [System.IO.Path]::Combine($Global:BuildHelper.GetToolDirectory("Xunit").FullName, "xunit.console.exe")
+    $TestFiles = $Global:BuildHelper.GetTestFiles()
+    :TestFileLoop foreach ($TestFile in $TestFiles) {
+        Exec { & $XunitConsoleExe $TestFile.FullName }
     }
 }
 
