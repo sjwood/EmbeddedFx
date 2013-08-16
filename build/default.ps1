@@ -134,138 +134,42 @@ Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GeneratePropertie
 
 
 Task CreatePowershellPropertiesFromGeneratedProperties -Depends GenerateProperties -Description "Creates in-memory Powershell variables from generated build properties" {
-    Write-Host -Fore Red "TODO!!!"
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+        New-Variable -Name $GeneratedProperty[0] -Value $GeneratedProperty[1] -Scope Script -Option Constant
+        Write-Output ("  `$" + $GeneratedProperty[0] + " set to '" + $GeneratedProperty[1] + "'")
+    }
 }
 
 
-Task Clean -Depends InstantiateBuildHelper -Description "Cleans all build products" {
-    $Global:BuildHelper.Clean()
+Task Clean -Depends CreatePowershellPropertiesFromGeneratedProperties -Description "Cleans all build products" {
+    $Directories = @($ObjDirectory, $BinDirectory)
+    :DirectoryLoop foreach ($Directory in $Directories) {
+        $DirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $Directory
+        if ($DirectoryInfo.Exists)
+        {
+            Write-Output ("  Removing directory '" + $DirectoryInfo.FullName + "'")
+            Remove-Item $DirectoryInfo.FullName -Force -Recurse
+        }
+    }
 }
 
 
-Task Build -Depends ValidateProperties, Clean, InstantiateBuildHelper, CreateMSBuildPropertyFileFromGeneratedProperties -Description "Builds all source code" {
-    $SolutionFiles = $Global:BuildHelper.GetSolutionFiles()
-    :SolutionFileLoop foreach ($SolutionFile in $SolutionFiles) {
+Task Build -Depends ValidateProperties, Clean, CreateMSBuildPropertyFileFromGeneratedProperties -Description "Builds all source code" {
+    $SolutionDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\sln"
+    :SolutionFileLoop foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly)) {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
         Exec { MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
     }
 }
 
 
-Task Test -Depends Build, InstantiateBuildHelper -Description "Runs all tests" {
-    $XunitConsoleExe = [System.IO.Path]::Combine($Global:BuildHelper.GetToolDirectory("Xunit").FullName, "xunit.console.exe")
-    $TestFiles = $Global:BuildHelper.GetTestFiles()
-    :TestFileLoop foreach ($TestFile in $TestFiles) {
+Task Test -Depends Build -Description "Runs all tests" {
+    $XunitConsoleExe = [System.IO.Path]::Combine($XunitDirectory, "xunit.console.exe")
+    $TestDirectory = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
+    :TestFileLoop foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories)) {
+        Write-Output ("  Running tests in assembly '" + $TestFile.FullName + "'")
         Exec { & $XunitConsoleExe $TestFile.FullName }
     }
-}
-
-
-Task InstantiateBuildHelper -Description "Creates a global Build.Helper object" {
-
-    $BuildHelperType = "
-    namespace Build
-    {
-        using System;
-        using System.Collections.Generic;
-        using System.IO;
-
-        public class Helper
-        {
-            public Helper(string[] allowedConfigurations, string[] allowedPlatforms)
-            {
-                this.SetDirectories();
-                this.DiscoverTooling();
-            }
-
-            private IList<string> AllowedConfigurations { get; set; }
-
-            private IList<string> AllowedPlatforms { get; set; }
-
-            private DirectoryInfo RootDirectory { get; set; }
-
-            private DirectoryInfo ObjectDirectory { get; set; }
-
-            private DirectoryInfo BinariesDirectory { get; set; }
-
-            private DirectoryInfo SolutionDirectory { get; set; }
-
-            private DirectoryInfo ToolsDirectory { get; set; }
-
-            private IDictionary<string, DirectoryInfo> Tools { get; set; }
-
-            public void Clean()
-            {
-                this.RemoveDirectory(this.ObjectDirectory);
-                this.RemoveDirectory(this.BinariesDirectory);
-            }
-
-            public IEnumerable<FileInfo> GetTestFiles()
-            {
-                return this.BinariesDirectory.GetFiles(""*.Facts.dll"", SearchOption.AllDirectories);
-            }
-
-            public IEnumerable<FileInfo> GetSolutionFiles()
-            {
-                return this.SolutionDirectory.GetFiles(""*.sln"", SearchOption.TopDirectoryOnly);
-            }
-
-            public DirectoryInfo GetToolDirectory(string toolName)
-            {
-                if (!this.Tools.ContainsKey(toolName))
-                {
-                    throw new Exception(string.Format(""Tool '{0}' cannot be found in '{1}'"", toolName, this.ToolsDirectory.FullName));
-                }
-
-                return this.Tools[toolName];
-            }
-
-            private void DiscoverTooling()
-            {
-                this.Tools = new Dictionary<string, DirectoryInfo>();
-
-                foreach(var toolDirectory in this.ToolsDirectory.GetDirectories(""*"", SearchOption.TopDirectoryOnly))
-                {
-                    DirectoryInfo version = null;
-
-                    foreach(var versionDirectory in toolDirectory.GetDirectories(""*"", SearchOption.TopDirectoryOnly))
-                    {
-                        if (version == null || string.Compare(versionDirectory.Name, version.Name, StringComparison.Ordinal) > 0)
-                        {
-                            version = versionDirectory;
-                        }
-                    }
-
-                    if (version != null)
-                    {
-                        this.Tools.Add(toolDirectory.Name, version);
-                    }
-                }
-            }
-
-            private void RemoveDirectory(DirectoryInfo directory)
-            {
-                if (directory.Exists)
-                {
-                    Console.WriteLine(""  Removing directory '{0}'"", directory.FullName);
-                    directory.Delete(true);
-                }
-            }
-
-            private void SetDirectories()
-            {
-                this.RootDirectory = new DirectoryInfo("".."");
-                this.ObjectDirectory = new DirectoryInfo(Path.Combine(this.RootDirectory.FullName, ""obj""));
-                this.BinariesDirectory = new DirectoryInfo(Path.Combine(this.RootDirectory.FullName, ""bin""));
-                this.SolutionDirectory = new DirectoryInfo(Path.Combine(this.RootDirectory.FullName, ""sln""));
-                this.ToolsDirectory = new DirectoryInfo(Path.Combine(this.RootDirectory.FullName, ""tools""));
-            }
-        }
-    }
-    "
-    Add-Type -TypeDefinition $BuildHelperType -Language CSharpVersion3
-
-    $Global:BuildHelper = New-Object -TypeName Build.Helper -ArgumentList $Global:AllowedConfigurations, $Global:AllowedPlatforms
 }
 
 
