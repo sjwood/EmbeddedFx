@@ -39,21 +39,40 @@ Framework "4.0"
 Task default -Depends Test
 
 
-Task CleanMSBuildProperties -Description "Delete all generated MSBuild property files" {
-    $CurrentDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "."
-    :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $CurrentDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly)) {
-        Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
-        $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
-        $MSBuildPropertyFileInfo.Delete()
+Task ValidateProperties -Description "Validates script properties" {
+    $ConfigurationIsValid = IsValueInSet $Configuration $Global:AllowedConfigurations
+    if ($ConfigurationIsValid -eq $False)
+    {
+        Write-Warning "  '$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
+    }
+    else
+    {
+        Write-Output ("  `$Configuration is set to '$Configuration'")
+    }
+
+    $PlatformIsValid = IsValueInSet $Platform $Global:AllowedPlatforms
+    if ($PlatformIsValid -eq $False)
+    {
+        Write-Warning "  '$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
+    }
+    else
+    {
+        Write-Output ("  `$Platform is set to '$Platform'")
+    }
+
+
+    if ($ConfigurationIsValid -eq $False -Or $PlatformIsValid -eq $False)
+    {
+        Throw "Either the build Configuration or Platform is invalid."
     }
 }
 
 
-Task CreateMSBuildProperties -Depends CleanMSBuildProperties -Description "Creates all generated MSBuild property files" {
-    $MSBuildProperties = @()
+Task GenerateProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process" {
+    $Global:GeneratedProperties = @()
 
-    $MSBuildProperties += ,("ObjDirectory", (New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName)
-    $MSBuildProperties += ,("BinDirectory", (New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName)
+    $Global:GeneratedProperties += ,("ObjDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName + "\"))
+    $Global:GeneratedProperties += ,("BinDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName + "\"))
 
     $ToolsDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\tools"
     :ToolDirectoryLoop foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly)) {
@@ -66,25 +85,56 @@ Task CreateMSBuildProperties -Depends CleanMSBuildProperties -Description "Creat
         }
         if ($CurrentVersionDirectory -ne $Null)
         {
-            $MSBuildProperties += ,(($ToolDirectory.Name + "Directory"), $CurrentVersionDirectory.FullName)
+            $Global:GeneratedProperties += ,(($ToolDirectory.Name + "Directory"), ($CurrentVersionDirectory.FullName + "\"))
         }
     }
 
-    :MSBuildPropertyLoop foreach ($MSBuildProperty in $MSBuildProperties) {
-        $MSBuildPropertyFileInfo = New-Object System.IO.FileInfo -ArgumentList (".\" + $MSBuildProperty[0] + ".props")
-        Write-Output ("  Creating '" + $MSBuildPropertyFileInfo.FullName + "'")
-        $XmlWriter = New-Object System.Xml.XmlTextWriter $MSBuildPropertyFileInfo.FullName, ([System.Text.Encoding]::UTF8)
-        $XmlWriter.Formatting = [System.Xml.Formatting]::Indented
-        $XmlWriter.Indentation = 4
-        $XmlWriter.WriteStartDocument()
-        $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
-        $XmlWriter.WriteStartElement("PropertyGroup")
-        $XmlWriter.WriteElementString($MSBuildProperty[0], $MSBuildProperty[1] + "\")
-        $XmlWriter.WriteEndElement()
-        $XmlWriter.WriteEndElement()
-        $XmlWriter.WriteEndDocument()
-        $XmlWriter.Close()
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+        Write-Output ("  Property '" + $GeneratedProperty[0] + "' generated with value '" + $GeneratedProperty[1] + "'")
     }
+}
+
+
+Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file created from generated properties" {
+    $PropertiesDirectory = New-Object System.IO.DirectoryInfo -ArgumentList ".\Properties"
+    if ($PropertiesDirectory.Exists -eq $False)
+    {
+        return
+    }
+
+    :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $PropertiesDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly)) {
+        Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
+        $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
+        $MSBuildPropertyFileInfo.Delete()
+    }
+}
+
+
+Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GenerateProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file" {
+    $PropertiesDirectory = New-Object System.IO.DirectoryInfo -ArgumentList ".\Properties"
+    $PropertiesDirectory.Create()
+
+    $MSBuildPropertyFileInfo = New-Object System.IO.FileInfo -ArgumentList ($PropertiesDirectory.FullName + "\MSBuild.props")
+    Write-Output ("  Creating '" + $MSBuildPropertyFileInfo.FullName + "'")
+
+    $XmlWriter = New-Object System.Xml.XmlTextWriter $MSBuildPropertyFileInfo.FullName, ([System.Text.Encoding]::UTF8)
+    $XmlWriter.Formatting = [System.Xml.Formatting]::Indented
+    $XmlWriter.Indentation = 4
+    $XmlWriter.WriteStartDocument()
+    $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
+    $XmlWriter.WriteStartElement("PropertyGroup")
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+        $XmlWriter.WriteElementString($GeneratedProperty[0], $GeneratedProperty[1])
+    }
+    $XmlWriter.WriteEndElement()
+    $XmlWriter.WriteEndElement()
+    $XmlWriter.WriteEndDocument()
+    $XmlWriter.Close()
+}
+
+
+Task CreatePowershellPropertiesFromGeneratedProperties -Depends GenerateProperties -Description "Creates in-memory Powershell variables from generated build properties" {
+    Write-Host -Fore Red "TODO!!!"
 }
 
 
@@ -93,30 +143,7 @@ Task Clean -Depends InstantiateBuildHelper -Description "Cleans all build produc
 }
 
 
-Task ValidateProperties -Description "Validates script properties" {
-    $ConfigurationIsValid = IsValueInSet $Configuration $Global:AllowedConfigurations
-    if ($ConfigurationIsValid -eq $False)
-    {
-        Write-Warning "  '$Configuration' is not an allowed configuration. Allowed configurations are $Global:AllowedConfigurations."
-    }
-    $PlatformIsValid = IsValueInSet $Platform $Global:AllowedPlatforms
-    if ($PlatformIsValid -eq $False)
-    {
-        Write-Warning "  '$Platform' is not an allowed platform. Allowed platforms are $Global:AllowedPlatforms."
-    }
-    if ($ConfigurationIsValid -eq $False -Or $PlatformIsValid -eq $False)
-    {
-        Throw "Either the build Configuration or Platform is invalid."
-    }
-}
-
-
-Task ReportProperties -Depends ValidateProperties -Description "Reports script properties" {
-    Write-Output ("  Building with Configuration: '$Configuration' and Platform: '$Platform'")
-}
-
-
-Task Build -Depends ReportProperties, CreateMSBuildProperties, Clean, InstantiateBuildHelper -Description "Builds all source code" {
+Task Build -Depends ValidateProperties, Clean, InstantiateBuildHelper, CreateMSBuildPropertyFileFromGeneratedProperties -Description "Builds all source code" {
     $SolutionFiles = $Global:BuildHelper.GetSolutionFiles()
     :SolutionFileLoop foreach ($SolutionFile in $SolutionFiles) {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
