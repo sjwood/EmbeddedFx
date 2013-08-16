@@ -6,10 +6,6 @@
     <Error Text="Cannot build due to missing mandatory properties. Have you run the main build script?" Condition="$(%(MandatoryProperties.Identity)) == ''" />
   </Target>
 
-  <ItemGroup>
-    <MandatoryProperties Include="ObjDirectory;BinDirectory" />
-  </ItemGroup>
-
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
   <PropertyGroup>
@@ -18,10 +14,6 @@
       @(PrepareForBuildDependsOn)
     </PrepareForBuildDependsOn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <MandatoryProperties Include="StyleCopDirectory" />
-  </ItemGroup>
 
   <Import Project="$(StyleCopDirectory)StyleCop.targets" Condition="$(StyleCopDirectory) != ''" />
 

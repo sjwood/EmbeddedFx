@@ -33,4 +33,10 @@
     <StyleCopOverrideSettingsFile>Settings.StyleCop</StyleCopOverrideSettingsFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <MandatoryProperties Include="ObjDirectory" />
+    <MandatoryProperties Include="BinDirectory" />
+    <MandatoryProperties Include="StyleCopDirectory" />
+  </ItemGroup>
+
 </Project>
