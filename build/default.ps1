@@ -75,21 +75,25 @@ Task GenerateProperties -Description "Generates build properties calculated from
     $Global:GeneratedProperties += ,("BinDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName + "\"))
 
     $ToolsDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\tools"
-    :ToolDirectoryLoop foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly)) {
+    :ToolDirectoryLoop foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+    {
         $CurrentVersionDirectory = $Null
-        :VersionDirectoryLoop foreach ($VersionDirectory in $ToolDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly)) {
+        :VersionDirectoryLoop foreach ($VersionDirectory in $ToolDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+        {
             if ($CurrentVersionDirectory -eq $Null -or $VersionDirectory.Name -gt $CurrentVersionDirectory.Name)
             {
                 $CurrentVersionDirectory = $VersionDirectory
             }
         }
+
         if ($CurrentVersionDirectory -ne $Null)
         {
             $Global:GeneratedProperties += ,(($ToolDirectory.Name + "Directory"), ($CurrentVersionDirectory.FullName + "\"))
         }
     }
 
-    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties)
+    {
         Write-Output ("  Property '" + $GeneratedProperty[0] + "' generated with value '" + $GeneratedProperty[1] + "'")
     }
 }
@@ -102,7 +106,8 @@ Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file create
         return
     }
 
-    :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $PropertiesDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly)) {
+    :MSBuildPropertyFileInfoLoop foreach ($MSBuildPropertyFileInfo in $PropertiesDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly))
+    {
         Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
         $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
         $MSBuildPropertyFileInfo.Delete()
@@ -123,9 +128,12 @@ Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GeneratePropertie
     $XmlWriter.WriteStartDocument()
     $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
     $XmlWriter.WriteStartElement("PropertyGroup")
-    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties)
+    {
         $XmlWriter.WriteElementString($GeneratedProperty[0], $GeneratedProperty[1])
     }
+
     $XmlWriter.WriteEndElement()
     $XmlWriter.WriteEndElement()
     $XmlWriter.WriteEndDocument()
@@ -134,7 +142,8 @@ Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GeneratePropertie
 
 
 Task CreatePowershellPropertiesFromGeneratedProperties -Depends GenerateProperties -Description "Creates in-memory Powershell variables from generated build properties" {
-    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties) {
+    :GeneratedPropertyLoop foreach ($GeneratedProperty in $Global:GeneratedProperties)
+    {
         New-Variable -Name $GeneratedProperty[0] -Value $GeneratedProperty[1] -Scope Script -Option Constant
         Write-Output ("  `$" + $GeneratedProperty[0] + " set to '" + $GeneratedProperty[1] + "'")
     }
@@ -143,7 +152,8 @@ Task CreatePowershellPropertiesFromGeneratedProperties -Depends GenerateProperti
 
 Task Clean -Depends CreatePowershellPropertiesFromGeneratedProperties -Description "Cleans all build products" {
     $Directories = @($ObjDirectory, $BinDirectory)
-    :DirectoryLoop foreach ($Directory in $Directories) {
+    :DirectoryLoop foreach ($Directory in $Directories)
+    {
         $DirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $Directory
         if ($DirectoryInfo.Exists)
         {
@@ -156,7 +166,8 @@ Task Clean -Depends CreatePowershellPropertiesFromGeneratedProperties -Descripti
 
 Task Build -Depends ValidateProperties, Clean, CreateMSBuildPropertyFileFromGeneratedProperties -Description "Builds all source code" {
     $SolutionDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\sln"
-    :SolutionFileLoop foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly)) {
+    :SolutionFileLoop foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
+    {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
         Exec { MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
     }
@@ -166,7 +177,8 @@ Task Build -Depends ValidateProperties, Clean, CreateMSBuildPropertyFileFromGene
 Task Test -Depends Build -Description "Runs all tests" {
     $XunitConsoleExe = [System.IO.Path]::Combine($XunitDirectory, "xunit.console.exe")
     $TestDirectory = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
-    :TestFileLoop foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories)) {
+    :TestFileLoop foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
+    {
         Write-Output ("  Running tests in assembly '" + $TestFile.FullName + "'")
         Exec { & $XunitConsoleExe $TestFile.FullName }
     }
@@ -174,7 +186,8 @@ Task Test -Depends Build -Description "Runs all tests" {
 
 
 function IsValueInSet([string] $Value, [string[]] $Set) {
-    :SetItemLoop foreach ($SetItem in $Set) {
+    :SetItemLoop foreach ($SetItem in $Set)
+    {
         if ($Value -eq $SetItem)
         {
             return $True
