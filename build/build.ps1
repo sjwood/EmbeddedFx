@@ -112,6 +112,8 @@ Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file create
         $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
         $MSBuildPropertyFileInfo.Delete()
     }
+
+    $PropertiesDirectory.Delete()
 }
 
 
@@ -150,7 +152,7 @@ Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildPropert
 }
 
 
-Task Clean -Depends CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products" {
+Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products" {
     $Directories = @($ObjDirectory, $BinDirectory)
     foreach ($Directory in $Directories)
     {
@@ -169,7 +171,9 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
     foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
-        Exec { MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform }
+        Exec {
+            MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
+        }
     }
 }
 
@@ -180,7 +184,10 @@ Task Test -Depends Build -Description "Runs all tests" {
     foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
     {
         Write-Output ("  Running tests in assembly '" + $TestFile.FullName + "'")
-        Exec { & $XunitConsoleExe $TestFile.FullName }
+        Exec {
+            $StdOut = & $XunitConsoleExe $TestFile.FullName /silent
+            Write-Output ("    " + $StdOut[$StdOut.Length - 1])
+        }
     }
 }
 
