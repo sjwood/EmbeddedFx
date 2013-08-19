@@ -39,7 +39,7 @@ Framework "4.0"
 Task default -Depends Test
 
 
-Task ValidateProperties -Description "Validates script properties" {
+Task ValidateScriptProperties -Description "Validates build script properties" {
     $ConfigurationIsValid = IsValueInSet $Configuration $Global:AllowedConfigurations
     if ($ConfigurationIsValid -eq $False)
     {
@@ -68,11 +68,11 @@ Task ValidateProperties -Description "Validates script properties" {
 }
 
 
-Task GenerateProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process" {
-    $Global:GeneratedProperties = @()
+Task GenerateBuildProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process" {
+    $Global:BuildProperties = @()
 
-    $Global:GeneratedProperties += ,("ObjDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName + "\"))
-    $Global:GeneratedProperties += ,("BinDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName + "\"))
+    $Global:BuildProperties += ,("ObjDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName + "\"))
+    $Global:BuildProperties += ,("BinDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName + "\"))
 
     $ToolsDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\tools"
     foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
@@ -88,13 +88,13 @@ Task GenerateProperties -Description "Generates build properties calculated from
 
         if ($CurrentVersionDirectory -ne $Null)
         {
-            $Global:GeneratedProperties += ,(($ToolDirectory.Name + "Directory"), ($CurrentVersionDirectory.FullName + "\"))
+            $Global:BuildProperties += ,(($ToolDirectory.Name + "Directory"), ($CurrentVersionDirectory.FullName + "\"))
         }
     }
 
-    foreach ($GeneratedProperty in $Global:GeneratedProperties)
+    foreach ($BuildProperty in $Global:BuildProperties)
     {
-        Write-Output ("  Property '" + $GeneratedProperty[0] + "' generated with value '" + $GeneratedProperty[1] + "'")
+        Write-Output ("  Property '" + $BuildProperty[0] + "' generated with value '" + $BuildProperty[1] + "'")
     }
 }
 
@@ -115,7 +115,7 @@ Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file create
 }
 
 
-Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GenerateProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file" {
+Task CreateMSBuildPropertyFileFromBuildProperties -Depends GenerateBuildProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file" {
     $PropertiesDirectory = New-Object System.IO.DirectoryInfo -ArgumentList ".\Properties"
     $PropertiesDirectory.Create()
 
@@ -129,9 +129,9 @@ Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GeneratePropertie
     $XmlWriter.WriteStartElement("Project", "http://schemas.microsoft.com/developer/msbuild/2003")
     $XmlWriter.WriteStartElement("PropertyGroup")
 
-    foreach ($GeneratedProperty in $Global:GeneratedProperties)
+    foreach ($BuildProperty in $Global:BuildProperties)
     {
-        $XmlWriter.WriteElementString($GeneratedProperty[0], $GeneratedProperty[1])
+        $XmlWriter.WriteElementString($BuildProperty[0], $BuildProperty[1])
     }
 
     $XmlWriter.WriteEndElement()
@@ -141,16 +141,16 @@ Task CreateMSBuildPropertyFileFromGeneratedProperties -Depends GeneratePropertie
 }
 
 
-Task CreatePowershellPropertiesFromGeneratedProperties -Depends GenerateProperties -Description "Creates in-memory Powershell variables from generated build properties" {
-    foreach ($GeneratedProperty in $Global:GeneratedProperties)
+Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildProperties -Description "Creates in-memory Powershell variables from generated build properties" {
+    foreach ($BuildProperty in $Global:BuildProperties)
     {
-        New-Variable -Name $GeneratedProperty[0] -Value $GeneratedProperty[1] -Scope Script -Option Constant
-        Write-Output ("  `$" + $GeneratedProperty[0] + " set to '" + $GeneratedProperty[1] + "'")
+        New-Variable -Name $BuildProperty[0] -Value $BuildProperty[1] -Scope Script -Option Constant
+        Write-Output ("  `$" + $BuildProperty[0] + " set to '" + $BuildProperty[1] + "'")
     }
 }
 
 
-Task Clean -Depends CreatePowershellPropertiesFromGeneratedProperties -Description "Cleans all build products" {
+Task Clean -Depends CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products" {
     $Directories = @($ObjDirectory, $BinDirectory)
     foreach ($Directory in $Directories)
     {
@@ -164,7 +164,7 @@ Task Clean -Depends CreatePowershellPropertiesFromGeneratedProperties -Descripti
 }
 
 
-Task Build -Depends ValidateProperties, Clean, CreateMSBuildPropertyFileFromGeneratedProperties -Description "Builds all source code" {
+Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFromBuildProperties -Description "Builds all source code" {
     $SolutionDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\sln"
     foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {

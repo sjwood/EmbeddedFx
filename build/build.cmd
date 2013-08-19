@@ -46,7 +46,7 @@ if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSi
   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; ^
 } ^
 Import-Module .\Psake\%PSAKE_VERSION%\psake.psm1; ^
-Invoke-psake -buildFile default.ps1 %*; ^
+Invoke-psake -buildFile build.ps1 %*; ^
 Remove-Module -Name psake; ^
 if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) ^
 { ^
