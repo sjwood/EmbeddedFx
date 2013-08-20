@@ -16,4 +16,4 @@
 @ECHO OFF
 
 
-%~dp0build.cmd %* -properties @{'Configuration'='Debug'}
+"%~dp0build.cmd" %* -properties @{'Configuration'='Debug'}
