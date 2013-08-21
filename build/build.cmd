@@ -47,16 +47,17 @@ if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSi
 } ^
 Import-Module .\Psake\%PSAKE_VERSION%\psake.psm1; ^
 Invoke-psake -buildFile build.ps1 %*; ^
+$ReturnCode = 1; ^
+if ($psake.build_success -eq $True) ^
+{ ^
+  $ReturnCode = 0; ^
+} ^
 Remove-Module -Name psake; ^
 if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) ^
 { ^
   Set-ExecutionPolicy -Scope CurrentUser $CurrentExecutionPolicy; ^
 } ^
-if ($psake.build_success -eq $False) ^
-{ ^
-  Exit 1; ^
-} ^
-Exit 0;
+Exit $ReturnCode;
 SET EXITCODE=%ERRORLEVEL%
 POPD
 GOTO END

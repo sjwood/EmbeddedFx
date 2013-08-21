@@ -16,4 +16,4 @@
 @ECHO OFF
 
 
-"%~dp0build.cmd" %* -properties @{'Configuration'='Release'}
+call "%~dp0build.cmd" %* -properties @{'Configuration'='Release'}
