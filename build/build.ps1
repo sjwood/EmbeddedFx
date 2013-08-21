@@ -171,8 +171,10 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
     foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
-        Exec {
-            MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
+        MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
+        if ($LastExitCode -ne 0)
+        {
+            Exit 1
         }
     }
 }
@@ -184,9 +186,11 @@ Task Test -Depends Build -Description "Runs all tests" {
     foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
     {
         Write-Output ("  Running tests in assembly '" + $TestFile.FullName + "'")
-        Exec {
-            $StdOut = & $XunitConsoleExe $TestFile.FullName /silent
-            Write-Output ("    " + $StdOut[$StdOut.Length - 1])
+        $StdOut = & $XunitConsoleExe $TestFile.FullName /silent
+        Write-Output ("    " + $StdOut[$StdOut.Length - 1])
+        if ($LastExitCode -ne 0)
+        {
+            Exit 1
         }
     }
 }
