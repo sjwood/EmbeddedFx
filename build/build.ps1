@@ -122,6 +122,7 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
 
     $Global:BuildProperties += ,("ObjDirectory", ("{0}{1}obj{1}" -f $RootDirectory, $Global:DirectorySeparator))
     $Global:BuildProperties += ,("BinDirectory", ("{0}{1}bin{1}" -f $RootDirectory, $Global:DirectorySeparator))
+    $Global:BuildProperties += ,("DocDirectory", ("{0}{1}doc{1}" -f $RootDirectory, $Global:DirectorySeparator))
 
     $ToolsDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}tools" -f $RootDirectory, $Global:DirectorySeparator)
     foreach ($ToolDirectoryInfo in $ToolsDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
@@ -206,7 +207,7 @@ Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildPropert
 
 
 Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products." {
-    $Directories = @($ObjDirectory, $BinDirectory)
+    $Directories = @($ObjDirectory, $BinDirectory, $DocDirectory)
     foreach ($Directory in $Directories)
     {
         $DirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $Directory

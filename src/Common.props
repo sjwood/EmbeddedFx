@@ -25,8 +25,12 @@ limitations under the License.
     <ErrorReport>prompt</ErrorReport>
     <FileAlignment>512</FileAlignment>
     <RootNamespace>$(AssemblyName)</RootNamespace>
-    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+    <StyleCopForceFullAnalysis>true</StyleCopForceFullAnalysis>
+    <StyleCopCacheResults>false</StyleCopCacheResults>
+    <StyleCopTreatErrorsAsWarnings>true</StyleCopTreatErrorsAsWarnings>
+    <StyleCopEnabled>true</StyleCopEnabled>
     <StyleCopOverrideSettingsFile>$(MSBuildThisFileDirectory)Settings.StyleCop</StyleCopOverrideSettingsFile>
+    <StyleCopMaxViolationCount>0</StyleCopMaxViolationCount>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningLevel>4</WarningLevel>
@@ -50,6 +54,7 @@ limitations under the License.
   <ItemGroup>
     <MandatoryProperties Include="ObjDirectory" />
     <MandatoryProperties Include="BinDirectory" />
+    <MandatoryProperties Include="DocDirectory" />
     <MandatoryProperties Include="StyleCopDirectory" />
   </ItemGroup>
 

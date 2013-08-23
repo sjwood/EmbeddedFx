@@ -25,6 +25,7 @@ limitations under the License.
   <PropertyGroup>
     <PrepareForBuildDependsOn>
       ValidateMandatoryPropertiesArePresent;
+      CreateOutputDirectories;
       @(PrepareForBuildDependsOn)
     </PrepareForBuildDependsOn>
   </PropertyGroup>
@@ -32,6 +33,10 @@ limitations under the License.
   <Target Name="ValidateMandatoryPropertiesArePresent">
     <Warning Text="Mandatory property %(MandatoryProperties.Identity) is missing!" Condition="$(%(MandatoryProperties.Identity)) == ''" />
     <Error Text="Cannot build due to missing mandatory properties. Have you run the main build script?" Condition="$(%(MandatoryProperties.Identity)) == ''" />
+  </Target>
+
+  <Target Name="CreateOutputDirectories">
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName($(StyleCopOutputFile)))" />
   </Target>
 
 </Project>

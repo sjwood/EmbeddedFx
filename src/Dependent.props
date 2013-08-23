@@ -21,6 +21,7 @@ limitations under the License.
   <PropertyGroup>
     <IntermediateOutputPath>$(ObjDirectory)$(SolutionName)\$(AssemblyName)\</IntermediateOutputPath>
     <OutputPath>$(BinDirectory)$(SolutionName)\$(AssemblyName)\</OutputPath>
+    <StyleCopOutputFile>$(DocDirectory)$(SolutionName)\$(AssemblyName)\StyleCopViolations.xml</StyleCopOutputFile>
   </PropertyGroup>
 
 </Project>
