@@ -239,6 +239,9 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
 Task Test -Depends Build -Description "Runs all tests." {
     $XunitConsoleExe = "{0}{1}xunit.console.exe" -f $XunitDirectory, $Global:DirectorySeparator
     $TestDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
+
+    $HasFailingTests = $False
+
     foreach ($TestFileInfo in $TestDirectoryInfo.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
     {
         Write-Output ("  Running tests in assembly '" + $TestFileInfo.FullName + "'")
@@ -246,8 +249,13 @@ Task Test -Depends Build -Description "Runs all tests." {
         Write-Output ("    " + $StdOut[$StdOut.Length - 1])
         if ($LastExitCode -ne 0)
         {
-            Exit 1
+            $HasFailingTests = $True
         }
+    }
+
+    if ($HasFailingTests -eq $True)
+    {
+        Exit 1
     }
 }
 
