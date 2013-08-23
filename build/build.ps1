@@ -244,8 +244,16 @@ Task Test -Depends Build -Description "Runs all tests." {
 
     foreach ($TestFileInfo in $TestDirectoryInfo.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
     {
+        $TestOutputPath = $TestFileInfo.FullName.Replace($BinDirectory, $DocDirectory)
+        $TestOutputPath = [System.IO.Path]::ChangeExtension($TestOutputPath, ".xunit.xml")
+        $TestOutputFileInfo = New-Object System.IO.FileInfo -ArgumentList $TestOutputPath
+        if ($TestOutputFileInfo.Directory.Exists -eq $False)
+        {
+            New-Item -Path $TestOutputFileInfo.Directory -Type Directory | Out-Null
+        }
+
         Write-Output ("  Running tests in assembly '" + $TestFileInfo.FullName + "'")
-        $StdOut = & $XunitConsoleExe $TestFileInfo.FullName /silent
+        $StdOut = & $XunitConsoleExe $TestFileInfo.FullName /silent /xml $TestOutputFileInfo.FullName
         Write-Output ("    " + $StdOut[$StdOut.Length - 1])
         if ($LastExitCode -ne 0)
         {
