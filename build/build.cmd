@@ -45,10 +45,10 @@ if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSi
 { ^
   Set-ExecutionPolicy -Scope CurrentUser RemoteSigned; ^
 } ^
-Import-Module .\Psake\%PSAKE_VERSION%\psake.psm1; ^
-Invoke-psake -buildFile build.ps1 %*; ^
+Import-Module "%~dp0Psake\%PSAKE_VERSION%\psake.psm1"; ^
+Invoke-psake -buildFile "%~dp0build.ps1" %*; ^
 $ReturnCode = 1; ^
-if ($psake.build_success -eq $True) ^
+if ($Psake.Build_Success -eq $True) ^
 { ^
   $ReturnCode = 0; ^
 } ^

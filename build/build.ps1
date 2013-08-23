@@ -16,6 +16,10 @@
 Set-StrictMode -Version Latest
 
 
+$Global:ScriptFileInfo = New-Object System.IO.FileInfo -ArgumentList $MyInvocation.MyCommand.Definition
+$Global:DirectorySeparator = [System.IO.Path]::DirectorySeparatorChar
+
+
 Properties {
     $Configuration = "Debug"
     $Platform = "AnyCPU"
@@ -69,26 +73,28 @@ Task ValidateScriptProperties -Description "Validates build script properties" {
 
 
 Task GenerateBuildProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process" {
+    $RootDirectory = $Global:ScriptFileInfo.Directory.Parent.FullName
+
     $Global:BuildProperties = @()
 
-    $Global:BuildProperties += ,("ObjDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\obj").FullName + "\"))
-    $Global:BuildProperties += ,("BinDirectory", ((New-Object System.IO.DirectoryInfo -ArgumentList "..\bin").FullName + "\"))
+    $Global:BuildProperties += ,("ObjDirectory", ("{0}{1}obj{1}" -f $RootDirectory, $Global:DirectorySeparator))
+    $Global:BuildProperties += ,("BinDirectory", ("{0}{1}bin{1}" -f $RootDirectory, $Global:DirectorySeparator))
 
-    $ToolsDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\tools"
-    foreach ($ToolDirectory in $ToolsDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+    $ToolsDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}tools" -f $RootDirectory, $Global:DirectorySeparator)
+    foreach ($ToolDirectoryInfo in $ToolsDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
     {
-        $CurrentVersionDirectory = $Null
-        foreach ($VersionDirectory in $ToolDirectory.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+        $CurrentVersionDirectoryInfo = $Null
+        foreach ($VersionDirectoryInfo in $ToolDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
         {
-            if ($CurrentVersionDirectory -eq $Null -or $VersionDirectory.Name -gt $CurrentVersionDirectory.Name)
+            if ($CurrentVersionDirectoryInfo -eq $Null -or $VersionDirectoryInfo.Name -gt $CurrentVersionDirectoryInfo.Name)
             {
-                $CurrentVersionDirectory = $VersionDirectory
+                $CurrentVersionDirectoryInfo = $VersionDirectoryInfo
             }
         }
 
-        if ($CurrentVersionDirectory -ne $Null)
+        if ($CurrentVersionDirectoryInfo -ne $Null)
         {
-            $Global:BuildProperties += ,(($ToolDirectory.Name + "Directory"), ($CurrentVersionDirectory.FullName + "\"))
+            $Global:BuildProperties += ,(("{0}Directory" -f $ToolDirectoryInfo.Name), ("{0}{1}" -f $CurrentVersionDirectoryInfo.FullName, $Global:DirectorySeparator))
         }
     }
 
@@ -100,28 +106,32 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
 
 
 Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file created from generated properties" {
-    $PropertiesDirectory = New-Object System.IO.DirectoryInfo -ArgumentList ".\Properties"
-    if ($PropertiesDirectory.Exists -eq $False)
+    $BuildDirectory = $Global:ScriptFileInfo.Directory.FullName
+
+    $PropertiesDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}Properties" -f $BuildDirectory, $Global:DirectorySeparator)
+    if ($PropertiesDirectoryInfo.Exists -eq $False)
     {
         return
     }
 
-    foreach ($MSBuildPropertyFileInfo in $PropertiesDirectory.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly))
+    foreach ($MSBuildPropertyFileInfo in $PropertiesDirectoryInfo.GetFiles("*.props", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Deleting '" + $MSBuildPropertyFileInfo.FullName + "'")
         $MSBuildPropertyFileInfo.Attributes = [System.IO.FileAttributes]::Normal
         $MSBuildPropertyFileInfo.Delete()
     }
 
-    $PropertiesDirectory.Delete()
+    $PropertiesDirectoryInfo.Delete()
 }
 
 
 Task CreateMSBuildPropertyFileFromBuildProperties -Depends GenerateBuildProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file" {
-    $PropertiesDirectory = New-Object System.IO.DirectoryInfo -ArgumentList ".\Properties"
-    $PropertiesDirectory.Create()
+    $BuildDirectory = $Global:ScriptFileInfo.Directory.FullName
 
-    $MSBuildPropertyFileInfo = New-Object System.IO.FileInfo -ArgumentList ($PropertiesDirectory.FullName + "\MSBuild.props")
+    $PropertiesDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}Properties" -f $BuildDirectory, $Global:DirectorySeparator)
+    $PropertiesDirectoryInfo.Create()
+
+    $MSBuildPropertyFileInfo = New-Object System.IO.FileInfo -ArgumentList ("{0}{1}MSBuild.props" -f $PropertiesDirectoryInfo.FullName, $Global:DirectorySeparator)
     Write-Output ("  Creating '" + $MSBuildPropertyFileInfo.FullName + "'")
 
     $XmlWriter = New-Object System.Xml.XmlTextWriter $MSBuildPropertyFileInfo.FullName, ([System.Text.Encoding]::UTF8)
@@ -167,11 +177,13 @@ Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuil
 
 
 Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFromBuildProperties -Description "Builds all source code" {
-    $SolutionDirectory = New-Object System.IO.DirectoryInfo -ArgumentList "..\sln"
-    foreach ($SolutionFile in $SolutionDirectory.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
+    $RootDirectory = $Global:ScriptFileInfo.Directory.Parent.FullName
+
+    $SolutionDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}sln" -f $RootDirectory, $Global:DirectorySeparator)
+    foreach ($SolutionFileInfo in $SolutionDirectoryInfo.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
-        Write-Output ("  Building solution '" + $SolutionFile.FullName + "'")
-        MsBuild $SolutionFile.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
+        Write-Output ("  Building solution '" + $SolutionFileInfo.FullName + "'")
+        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
         if ($LastExitCode -ne 0)
         {
             Exit 1
@@ -181,12 +193,12 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
 
 
 Task Test -Depends Build -Description "Runs all tests" {
-    $XunitConsoleExe = [System.IO.Path]::Combine($XunitDirectory, "xunit.console.exe")
-    $TestDirectory = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
-    foreach ($TestFile in $TestDirectory.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
+    $XunitConsoleExe = "{0}{1}xunit.console.exe" -f $XunitDirectory, $Global:DirectorySeparator
+    $TestDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
+    foreach ($TestFileInfo in $TestDirectoryInfo.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
     {
-        Write-Output ("  Running tests in assembly '" + $TestFile.FullName + "'")
-        $StdOut = & $XunitConsoleExe $TestFile.FullName /silent
+        Write-Output ("  Running tests in assembly '" + $TestFileInfo.FullName + "'")
+        $StdOut = & $XunitConsoleExe $TestFileInfo.FullName /silent
         Write-Output ("    " + $StdOut[$StdOut.Length - 1])
         if ($LastExitCode -ne 0)
         {
