@@ -43,7 +43,50 @@ Framework "4.0"
 Task default -Depends Test
 
 
-Task ValidateScriptProperties -Description "Validates build script properties" {
+Task Help -Description "Displays information on the Tasks in this build file." {
+    # Adapted code from Write-Documentation function in psake.psm1 (https://github.com/JamesKovacs/psake/blob/master/psake.psm1)
+
+    Write-Output ("`r`n  Psake script '" + $Global:ScriptFileInfo.FullName + "' has the following Tasks defined:`r`n")
+
+    $CurrentContext = $Psake.Context.Peek()
+
+    if ($CurrentContext.Tasks.Default)
+    {
+        $DefaultTaskDependencies = $CurrentContext.Tasks.Default.DependsOn
+    }
+    else
+    {
+        $DefaultTaskDependencies = @()
+    }
+
+    foreach ($TaskKey in $CurrentContext.Tasks.Keys | Sort)
+    {
+        if ($TaskKey -eq "default")
+        {
+            continue
+        }
+
+        $Task = $CurrentContext.Tasks[$TaskKey]
+
+        $TaskNameSuffix = ""
+        if ($DefaultTaskDependencies -Contains $Task.Name)
+        {
+            $TaskNameSuffix = " (default)"
+        }
+
+        Write-Output ("  - " + $Task.Name + $TaskNameSuffix)
+        Write-Output ("      " + $Task.Description)
+        $DependenciesMessage = "No dependencies"
+        if ($Task.DependsOn.Length -gt 0)
+        {
+            $DependenciesMessage = "Depends on: " + [System.String]::Join(", ", $Task.DependsOn)
+        }
+        Write-Output "      <$DependenciesMessage>`r`n"
+    }
+}
+
+
+Task ValidateScriptProperties -Description "Validates build script properties." {
     $ConfigurationIsValid = IsValueInSet $Configuration $Global:AllowedConfigurations
     if ($ConfigurationIsValid -eq $False)
     {
@@ -72,7 +115,7 @@ Task ValidateScriptProperties -Description "Validates build script properties" {
 }
 
 
-Task GenerateBuildProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process" {
+Task GenerateBuildProperties -Description "Generates build properties calculated from the environment (e.g. tool versions) for use in the build process." {
     $RootDirectory = $Global:ScriptFileInfo.Directory.Parent.FullName
 
     $Global:BuildProperties = @()
@@ -105,7 +148,7 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
 }
 
 
-Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file created from generated properties" {
+Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file created from generated properties." {
     $BuildDirectory = $Global:ScriptFileInfo.Directory.FullName
 
     $PropertiesDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}Properties" -f $BuildDirectory, $Global:DirectorySeparator)
@@ -125,7 +168,7 @@ Task CleanMSBuildPropertyFile -Description "Deletes MSBuild property file create
 }
 
 
-Task CreateMSBuildPropertyFileFromBuildProperties -Depends GenerateBuildProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file" {
+Task CreateMSBuildPropertyFileFromBuildProperties -Depends GenerateBuildProperties, CleanMSBuildPropertyFile -Description "Writes generated build properties to an MSBuild property file." {
     $BuildDirectory = $Global:ScriptFileInfo.Directory.FullName
 
     $PropertiesDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}Properties" -f $BuildDirectory, $Global:DirectorySeparator)
@@ -153,7 +196,7 @@ Task CreateMSBuildPropertyFileFromBuildProperties -Depends GenerateBuildProperti
 }
 
 
-Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildProperties -Description "Creates in-memory Powershell variables from generated build properties" {
+Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildProperties -Description "Creates in-memory Powershell variables from generated build properties." {
     foreach ($BuildProperty in $Global:BuildProperties)
     {
         New-Variable -Name $BuildProperty[0] -Value $BuildProperty[1] -Scope Script -Option Constant
@@ -162,7 +205,7 @@ Task CreatePowershellPropertiesFromBuildProperties -Depends GenerateBuildPropert
 }
 
 
-Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products" {
+Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuildProperties -Description "Cleans all build products." {
     $Directories = @($ObjDirectory, $BinDirectory)
     foreach ($Directory in $Directories)
     {
@@ -176,7 +219,7 @@ Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuil
 }
 
 
-Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFromBuildProperties -Description "Builds all source code" {
+Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFromBuildProperties -Description "Builds all source code." {
     $RootDirectory = $Global:ScriptFileInfo.Directory.Parent.FullName
 
     $SolutionDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}sln" -f $RootDirectory, $Global:DirectorySeparator)
@@ -192,7 +235,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
 }
 
 
-Task Test -Depends Build -Description "Runs all tests" {
+Task Test -Depends Build -Description "Runs all tests." {
     $XunitConsoleExe = "{0}{1}xunit.console.exe" -f $XunitDirectory, $Global:DirectorySeparator
     $TestDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
     foreach ($TestFileInfo in $TestDirectoryInfo.GetFiles("*.Facts.dll", [System.IO.SearchOption]::AllDirectories))
