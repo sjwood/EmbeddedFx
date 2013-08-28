@@ -22,19 +22,19 @@ $Global:DirectorySeparator = [System.IO.Path]::DirectorySeparatorChar
 
 Properties {
     $Configuration = "Debug"
-    $Platform = "AnyCPU"
+    $Platform = "Any CPU"
 }
 
 
 $Global:AllowedConfigurations = "Debug", "Release"
 # Note 1:
-# There is an inconsistency between Solution and Project Platform values, so use Project definition for now
+# There is an inconsistency between Solution and Project Platform values, but as we only build solutions we use the Solution definition
 # see http://connect.microsoft.com/VisualStudio/feedback/details/503935/msbuild-inconsistent-platform-for-any-cpu-between-solution-and-project
 #
 # Note 2:
 # platform specific builds (i.e. "x86", "x64", "Itanium") are not supported at present
 #
-$Global:AllowedPlatforms = "AnyCPU"
+$Global:AllowedPlatforms = "Any CPU"
 
 
 Framework "4.0"
@@ -227,7 +227,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
     foreach ($SolutionFileInfo in $SolutionDirectoryInfo.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFileInfo.FullName + "'")
-        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:minimal /maxcpucount /p:Configuration=$Configuration /p:Platform=$Platform
+        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:minimal /maxcpucount /property:Configuration=$Configuration /property:Platform=$Platform
         if ($LastExitCode -ne 0)
         {
             Exit 1
