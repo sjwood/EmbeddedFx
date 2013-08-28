@@ -24,15 +24,24 @@ limitations under the License.
 
   <PropertyGroup>
     <PrepareForBuildDependsOn>
+      GenerateMSBuildScriptPropertiesForVisualStudioOutOfBoxExperience;
       ValidateMandatoryPropertiesArePresent;
       CreateOutputDirectories;
       @(PrepareForBuildDependsOn)
     </PrepareForBuildDependsOn>
   </PropertyGroup>
 
+  <Target Name="GenerateMSBuildScriptPropertiesForVisualStudioOutOfBoxExperience">
+    <PropertyGroup>
+      <IsVisualStudioOOBE>False</IsVisualStudioOOBE>
+      <IsVisualStudioOOBE Condition="'$(BuildingInsideVisualStudio)' == 'True' And '$(MSBuildPropertiesFileExists)' == 'False'">True</IsVisualStudioOOBE>
+    </PropertyGroup>
+    <Exec Command="$(MSBuildThisFileDirectory)..\build\build.cmd CreateMSBuildPropertyFileFromBuildProperties > NUL" Condition="'$(IsVisualStudioOOBE)' == 'True'" />
+  </Target>
+
   <Target Name="ValidateMandatoryPropertiesArePresent">
-    <Warning Text="Mandatory property %(MandatoryProperties.Identity) is missing!" Condition="$(%(MandatoryProperties.Identity)) == ''" />
-    <Error Text="Cannot build due to missing mandatory properties. Have you run the main build script?" Condition="$(%(MandatoryProperties.Identity)) == ''" />
+    <Warning Text="Mandatory property %(MandatoryProperties.Identity) is missing!" Condition="'$(%(MandatoryProperties.Identity))' == '' And '$(IsVisualStudioOOBE)' == 'False'" />
+    <Error Text="Cannot build due to missing mandatory properties." Condition="'$(%(MandatoryProperties.Identity))' == '' And '$(IsVisualStudioOOBE)' == 'False'" />
   </Target>
 
   <Target Name="CreateOutputDirectories">

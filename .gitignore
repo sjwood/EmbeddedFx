@@ -2,6 +2,7 @@ bin/
 build/Properties/
 doc/
 obj/
+src/*/EmbeddedFx/
 *.suo
 *.sln.cache
 StyleCop.Cache

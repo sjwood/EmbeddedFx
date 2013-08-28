@@ -18,7 +18,12 @@ limitations under the License.
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <Import Project="$(MSBuildThisFileDirectory)..\build\Properties\*.props" />
+  <PropertyGroup>
+    <MSBuildPropertiesFilePath>$(MSBuildThisFileDirectory)..\build\Properties\MSBuild.props</MSBuildPropertiesFilePath>
+    <MSBuildPropertiesFileExists>$([System.IO.File]::Exists($(MSBuildPropertiesFilePath)))</MSBuildPropertiesFileExists>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildPropertiesFilePath)" Condition="'$(MSBuildPropertiesFileExists)' == 'True'" />
   
   <PropertyGroup>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
