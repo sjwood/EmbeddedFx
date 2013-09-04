@@ -57,6 +57,11 @@ limitations under the License.
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyVersion.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <MandatoryProperties Include="ObjDirectory" />
     <MandatoryProperties Include="BinDirectory" />
     <MandatoryProperties Include="DocDirectory" />

@@ -52,6 +52,7 @@ limitations under the License.
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\ActOnObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\AppDomainInfoProvider.cs" />

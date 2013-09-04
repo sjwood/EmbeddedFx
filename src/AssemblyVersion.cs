@@ -1,4 +1,4 @@
-﻿// Copyright 2012-2013 Steve Wood
+// Copyright 2012-2013 Steve Wood
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,24 +15,4 @@
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1634:FileHeaderMustShowCopyright", Justification = "Documentation ignored at present time.")]
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1639:FileHeaderMustHaveSummary", Justification = "Documentation ignored at present time.")]
 
-namespace EmbeddedFx.Facts.Support
-{
-    using System;
-    using System.Reflection;
-
-    public sealed class AppDomainInfoProvider : MarshalByRefObject
-    {
-        public AssemblyName[] GetLoadedAssemblyNames()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var assemblyNames = new AssemblyName[assemblies.Length];
-
-            for (var i = 0; i < assemblies.Length; i++)
-            {
-                assemblyNames[i] = assemblies[i].GetName();
-            }
-
-            return assemblyNames;
-        }
-    }
-}
+[assembly: System.Reflection.AssemblyVersion("0.0.1.0")]

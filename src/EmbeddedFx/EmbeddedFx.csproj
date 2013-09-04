@@ -29,6 +29,7 @@ limitations under the License.
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
 
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EmbeddedAssemblyLoader.cs" />
   </ItemGroup>
 
