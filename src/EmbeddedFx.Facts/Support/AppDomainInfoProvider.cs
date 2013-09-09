@@ -18,10 +18,17 @@
 namespace EmbeddedFx.Facts.Support
 {
     using System;
+    using System.Collections.Generic;
     using System.Reflection;
 
     public sealed class AppDomainInfoProvider : MarshalByRefObject
     {
+        private static readonly IDictionary<Version, string> _ClrVersionToFieldNameMap = new Dictionary<Version, string>()
+        {
+            { new Version(2, 0), "AssemblyResolve" },
+            { new Version(4, 0), "_AssemblyResolve" }
+        };
+
         public AssemblyName[] GetLoadedAssemblyNames()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -33,6 +40,44 @@ namespace EmbeddedFx.Facts.Support
             }
 
             return assemblyNames;
+        }
+
+        public int GetAssemblyResolveEventSubscriberCount()
+        {
+            var eventHandler = AppDomainInfoProvider.GetAppDomainAssemblyResolveEventHandler();
+            if (eventHandler == null)
+            {
+                return 0;
+            }
+
+            var subscribers = eventHandler.GetInvocationList();
+            if (subscribers == null)
+            {
+                return 0;
+            }
+
+            return subscribers.Length;
+        }
+
+        private static ResolveEventHandler GetAppDomainAssemblyResolveEventHandler()
+        {
+            var fieldName = GetAssemblyResolveEventHandlerFieldNameForExecutingClr();
+
+            var field = typeof(AppDomain).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+
+            return (ResolveEventHandler)field.GetValue(AppDomain.CurrentDomain);
+        }
+
+        private static string GetAssemblyResolveEventHandlerFieldNameForExecutingClr()
+        {
+            var clrVersion = new Version(Environment.Version.Major, Environment.Version.Minor);
+
+            if (!_ClrVersionToFieldNameMap.ContainsKey(clrVersion))
+            {
+                throw new NotImplementedException("This is not supported in this version of the framework");
+            }
+
+            return _ClrVersionToFieldNameMap[clrVersion];
         }
     }
 }

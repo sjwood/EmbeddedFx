@@ -103,6 +103,74 @@ namespace EmbeddedFx.Facts
             this.ExecuteTestInsideTestAppDomain(testSetup);
         }
 
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
+        {
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                // arrange
+                var source = @"
+                    namespace GivenAnEmbeddedAssemblyLoader
+                    {
+                        using System;
+
+                        public class WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero : MarshalByRefObject
+                        {
+                            public WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
+                            {
+                            }
+                        }
+                    }";
+                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
+                var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+
+                // act
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testExecutable.FullName, "GivenAnEmbeddedAssemblyLoader.WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero");
+
+                // assert
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        {
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                // arrange
+                var source = @"
+                    namespace GivenAnEmbeddedAssemblyLoader
+                    {
+                        using System;
+                        using EmbeddedFx;
+
+                        public class WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne : MarshalByRefObject
+                        {
+                            public WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+                            {
+                                new EmbeddedAssemblyLoader();
+                            }
+                        }
+                    }";
+                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
+                var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+
+                // act
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testExecutable.FullName, "GivenAnEmbeddedAssemblyLoader.WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne");
+
+                // assert
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(1, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
         private void ExecuteTestInsideTestAppDomain(Action<TestSetup> action)
         {
             IsolatedStorageWrapper isolatedStorageWrapper = null;
@@ -145,6 +213,14 @@ namespace EmbeddedFx.Facts
             var message = string.Format("AppDomain '{0}' has incorrectly{1} loaded Assembly '{2}'", appDomain.FriendlyName, notOrEmpty, assemblyName.FullName);
 
             Assert.True(expected == hasLoaded, string.Format("Has{0} loaded {1}!", hasLoaded ? string.Empty : " NOT", assemblyName.FullName));
+        }
+
+        private void AssertAppDomainHasAssemblyResolveEventSubscribers(int expected, AppDomain appDomain)
+        {
+            var proxy = (AppDomainInfoProvider)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(AppDomainInfoProvider).FullName);
+            var subscriberCount = proxy.GetAssemblyResolveEventSubscriberCount();
+
+            Assert.Equal(expected, subscriberCount);
         }
 
         private FileInfo CompileCodeIntoAppDomainsPath(AppDomain appDomain, string source, bool generateExecutable, params string[] referencedAssemblies)
