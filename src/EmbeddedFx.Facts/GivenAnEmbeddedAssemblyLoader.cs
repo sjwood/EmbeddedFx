@@ -28,7 +28,7 @@ namespace EmbeddedFx.Facts
     {
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
+        public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -62,7 +62,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
+        public void WhenATypeDoesCallRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -80,7 +80,7 @@ namespace EmbeddedFx.Facts
                             {
                                 public " + sourceClassName + @"()
                                 {
-                                    new EmbeddedAssemblyLoader();
+                                    EmbeddedAssemblyLoader.Register();
                                 }
                             }
                         }";
@@ -101,7 +101,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
+        public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -134,7 +134,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        public void WhenATypeDoesCallRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -152,7 +152,7 @@ namespace EmbeddedFx.Facts
                         {
                             public " + sourceClassName + @"()
                             {
-                                new EmbeddedAssemblyLoader();
+                                EmbeddedAssemblyLoader.Register();
                             }
                         }
                     }";

@@ -19,9 +19,9 @@ namespace EmbeddedFx
 {
     using System;
 
-    public sealed class EmbeddedAssemblyLoader
+    public static class EmbeddedAssemblyLoader
     {
-        public EmbeddedAssemblyLoader()
+        public static void Register()
         {
             AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => null;
         }
