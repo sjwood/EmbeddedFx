@@ -23,7 +23,7 @@ namespace EmbeddedFx.Facts.Support
 
     public sealed class AppDomainInfoProvider : MarshalByRefObject
     {
-        private static readonly IDictionary<Version, string> _ClrVersionToFieldNameMap = new Dictionary<Version, string>()
+        private static readonly IDictionary<Version, string> ClrVersionToFieldNameMap = new Dictionary<Version, string>()
         {
             { new Version(2, 0), "AssemblyResolve" },
             { new Version(4, 0), "_AssemblyResolve" }
@@ -72,12 +72,12 @@ namespace EmbeddedFx.Facts.Support
         {
             var clrVersion = new Version(Environment.Version.Major, Environment.Version.Minor);
 
-            if (!_ClrVersionToFieldNameMap.ContainsKey(clrVersion))
+            if (!ClrVersionToFieldNameMap.ContainsKey(clrVersion))
             {
                 throw new NotImplementedException("This is not supported in this version of the framework");
             }
 
-            return _ClrVersionToFieldNameMap[clrVersion];
+            return ClrVersionToFieldNameMap[clrVersion];
         }
     }
 }
