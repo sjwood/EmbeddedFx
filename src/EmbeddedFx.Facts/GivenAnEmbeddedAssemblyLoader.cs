@@ -30,28 +30,28 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
         {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
                 var source = @"
-                    namespace GivenAnEmbeddedAssemblyLoader
+                    namespace " + sourceNamespace + @"
                     {
-                        public class WhenAnAssemblyRefersToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain
+                        using System;
+
+                        public class " + sourceClassName + @" : MarshalByRefObject
                         {
-                            public static int Main(string[] args)
-                            {
-                                return 0;
-                            }
                         }
                     }";
                 var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, true, "System.dll", embeddedFxFileInfo.Name);
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
 
                 // act
-                var exitCode = ts.TestAppDomain.ExecuteAssembly(testExecutable.FullName);
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
 
                 // assert
-                Assert.Equal(0, exitCode);
                 var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(embeddedFxFileInfo.FullName);
                 this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, embeddedFxAssemblyName);
                 this.AssertAppDomainHasLoadedAssemblyName(false, ts.TestAppDomain, embeddedFxAssemblyName);
@@ -64,37 +64,33 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
         {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
             Action<TestSetup> testSetup = (ts) =>
                 {
                     // arrange
                     var source = @"
-                        namespace GivenAnEmbeddedAssemblyLoader
+                        namespace " + sourceNamespace + @"
                         {
+                            using System;
                             using EmbeddedFx;
 
-                            public class WhenAnAssemblyRefersToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain
+                            public class " + sourceClassName + @" : MarshalByRefObject
                             {
-                                private static EmbeddedAssemblyLoader _EmbeddedAssemblyLoader;
-
-                                static WhenAnAssemblyRefersToEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
+                                public " + sourceClassName + @"()
                                 {
-                                    _EmbeddedAssemblyLoader = new EmbeddedAssemblyLoader();
-                                }
-
-                                public static int Main(string[] args)
-                                {
-                                    return 0;
+                                    new EmbeddedAssemblyLoader();
                                 }
                             }
                         }";
                     var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                    var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, true, "System.dll", embeddedFxFileInfo.Name);
+                    var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
 
                     // act
-                    var exitCode = ts.TestAppDomain.ExecuteAssembly(testExecutable.FullName);
+                    var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
                     
                     // assert
-                    Assert.Equal(0, exitCode);
                     var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(embeddedFxFileInfo.FullName);
                     this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, embeddedFxAssemblyName);
                     this.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, embeddedFxAssemblyName);
@@ -107,26 +103,26 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
         {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
                 var source = @"
-                    namespace GivenAnEmbeddedAssemblyLoader
+                    namespace " + sourceNamespace + @"
                     {
                         using System;
 
-                        public class WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero : MarshalByRefObject
+                        public class " + sourceClassName + @" : MarshalByRefObject
                         {
-                            public WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
-                            {
-                            }
                         }
                     }";
                 var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testExecutable.FullName, "GivenAnEmbeddedAssemblyLoader.WhenAnAssemblyDoesNotHoldAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero");
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -140,28 +136,31 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
                 var source = @"
-                    namespace GivenAnEmbeddedAssemblyLoader
+                    namespace " + sourceNamespace + @"
                     {
                         using System;
                         using EmbeddedFx;
 
-                        public class WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne : MarshalByRefObject
+                        public class " + sourceClassName + @" : MarshalByRefObject
                         {
-                            public WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+                            public " + sourceClassName + @"()
                             {
                                 new EmbeddedAssemblyLoader();
                             }
                         }
                     }";
                 var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testExecutable = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testExecutable.FullName, "GivenAnEmbeddedAssemblyLoader.WhenAnAssemblyHoldsAReferenceToEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne");
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
