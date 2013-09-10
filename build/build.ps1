@@ -23,6 +23,7 @@ $Global:DirectorySeparator = [System.IO.Path]::DirectorySeparatorChar
 Properties {
     $Configuration = "Debug"
     $Platform = "Any CPU"
+    $Verbose = $False
 }
 
 
@@ -107,10 +108,25 @@ Task ValidateScriptProperties -Description "Validates build script properties." 
         Write-Output ("  `$Platform is set to '$Platform'")
     }
 
-
-    if ($ConfigurationIsValid -eq $False -Or $PlatformIsValid -eq $False)
+    $VerboseIsValid = $False
+    if ($Verbose -eq $Null)
     {
-        Throw "Either the build Configuration or Platform is invalid."
+        Write-Warning ("  $Verbose is Null. Verbose setting must be a boolean.")
+    }
+    else
+    {
+        if ($Verbose.GetType() -ne [System.Type]::GetType("System.Boolean"))
+        {
+            Write-Warning ("  Verbose property is a boolean. Provided value $Verbose of type " + $Verbose.GetType() + " will be interpreted.")
+            $Verbose = [System.Convert]::ToBoolean($Verbose)
+        }
+        Write-Output ("  `$Verbose is set to '$Verbose'")
+        $VerboseIsValid = $True
+    }
+
+    if ($ConfigurationIsValid -eq $False -Or $PlatformIsValid -eq $False -Or $VerboseIsValid -eq $False)
+    {
+        Throw "Either the Configuration, Platform or Verbose properties are invalid."
     }
 }
 
@@ -221,13 +237,19 @@ Task Clean -Depends CleanMSBuildPropertyFile, CreatePowershellPropertiesFromBuil
 
 
 Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFromBuildProperties -Description "Builds all source code." {
+    $MSBuildVerbosity = "minimal"
+    if ($Verbose -eq $True)
+    {
+        $MSBuildVerbosity = "normal"
+    }
+
     $RootDirectory = $Global:ScriptFileInfo.Directory.Parent.FullName
 
     $SolutionDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}sln" -f $RootDirectory, $Global:DirectorySeparator)
     foreach ($SolutionFileInfo in $SolutionDirectoryInfo.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFileInfo.FullName + "'")
-        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:minimal /maxcpucount /property:Configuration=$Configuration /property:Platform=$Platform
+        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:$MSBuildVerbosity /maxcpucount /property:Configuration=$Configuration /property:Platform=$Platform
         if ($LastExitCode -ne 0)
         {
             Exit 1
@@ -237,7 +259,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
 
 
 Task Test -Depends Build -Description "Runs all tests." {
-    $XunitConsoleExe = "{0}{1}xunit.console.exe" -f $XunitDirectory, $Global:DirectorySeparator
+    $XunitConsoleExe = "{0}xunit.console.exe" -f $XunitDirectory
     $TestDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
 
     $HasFailingTests = $False
@@ -253,8 +275,15 @@ Task Test -Depends Build -Description "Runs all tests." {
         }
 
         Write-Output ("  Running tests in assembly '" + $TestFileInfo.FullName + "'")
-        $StdOut = & $XunitConsoleExe $TestFileInfo.FullName /silent /xml $TestOutputFileInfo.FullName
-        Write-Output ("    " + $StdOut[$StdOut.Length - 1])
+        if ($Verbose -eq $True)
+        {
+            & $XunitConsoleExe $TestFileInfo.FullName /xml $TestOutputFileInfo.FullName
+        }
+        else
+        {
+            $StdOut = & $XunitConsoleExe $TestFileInfo.FullName /xml $TestOutputFileInfo.FullName
+            Write-Output ("    " + $StdOut[$StdOut.Length - 1])
+        }
         if ($LastExitCode -ne 0)
         {
             $HasFailingTests = $True
