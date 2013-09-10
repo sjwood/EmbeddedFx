@@ -21,9 +21,29 @@ namespace EmbeddedFx
 
     public static class EmbeddedAssemblyLoader
     {
+        private static readonly object Padlock;
+
+        static EmbeddedAssemblyLoader()
+        {
+            EmbeddedAssemblyLoader.Padlock = new object();
+            EmbeddedAssemblyLoader.AlreadyRegistered = false;
+        }
+
+        private static bool AlreadyRegistered { get; set; }
+
         public static void Register()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => null;
+            lock (EmbeddedAssemblyLoader.Padlock)
+            {
+                if (EmbeddedAssemblyLoader.AlreadyRegistered)
+                {
+                    return;
+                }
+
+                AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => null;
+
+                EmbeddedAssemblyLoader.AlreadyRegistered = true;
+            }
         }
     }
 }

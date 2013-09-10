@@ -62,7 +62,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenATypeDoesCallRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
+        public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -134,7 +134,7 @@ namespace EmbeddedFx.Facts
 
         [Fact]
         [Trait("Assembly", "EmbeddedFx")]
-        public void WhenATypeDoesCallRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
             var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
             var sourceClassName = MethodBase.GetCurrentMethod().Name;
@@ -152,6 +152,46 @@ namespace EmbeddedFx.Facts
                         {
                             public " + sourceClassName + @"()
                             {
+                                EmbeddedAssemblyLoader.Register();
+                            }
+                        }
+                    }";
+                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+
+                // act
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+
+                // assert
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(1, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                // arrange
+                var source = @"
+                    namespace " + sourceNamespace + @"
+                    {
+                        using System;
+                        using EmbeddedFx;
+
+                        public class " + sourceClassName + @" : MarshalByRefObject
+                        {
+                            public " + sourceClassName + @"()
+                            {
+                                EmbeddedAssemblyLoader.Register();
+                                EmbeddedAssemblyLoader.Register();
                                 EmbeddedAssemblyLoader.Register();
                             }
                         }
