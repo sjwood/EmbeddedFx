@@ -263,6 +263,18 @@ Task Test -Depends Build -Description "Runs all tests." {
 
     if ($HasFailingTests -eq $True)
     {
+        Write-Host -ForegroundColor Red "  Test failures:"
+
+        $XunitTestReportDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $DocDirectory
+        foreach ($XunitTestReportFileInfo in $XunitTestReportDirectoryInfo.GetFiles("*.xunit.xml", [System.IO.SearchOption]::AllDirectories))
+        {
+            $FailingTests = Select-Xml -XPath "/assembly/class/test[@result='Fail']" -Path $XunitTestReportFileInfo.FullName
+            foreach ($FailingTest in $FailingTests)
+            {
+                Write-Host -ForegroundColor Red ("    " + $FailingTest.Node.GetAttribute("method") + " in assembly " + $FailingTest.Node.ParentNode.ParentNode.GetAttribute("name"))
+            }
+        }
+
         Exit 1
     }
 }
