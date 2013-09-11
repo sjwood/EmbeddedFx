@@ -210,6 +210,118 @@ namespace EmbeddedFx.Facts
             this.ExecuteTestInsideTestAppDomain(testSetup);
         }
 
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleTypesThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                // arrange
+                var source = @"
+                    namespace " + sourceNamespace + @"
+                    {
+                        using System;
+                        using EmbeddedFx;
+
+                        public class " + sourceClassName + @" : MarshalByRefObject
+                        {
+                            public " + sourceClassName + @"()
+                            {
+                                new " + sourceClassName + @".A();
+                                new " + sourceClassName + @".B();
+                                new " + sourceClassName + @".C();
+                            }
+
+                            private class A
+                            {
+                                public A()
+                                {
+                                    EmbeddedAssemblyLoader.Register();
+                                }
+                            }
+
+                            private class B
+                            {
+                                public B()
+                                {
+                                    EmbeddedAssemblyLoader.Register();
+                                }
+                            }
+
+                            private class C
+                            {
+                                public C()
+                                {
+                                    EmbeddedAssemblyLoader.Register();
+                                }
+                            }
+                        }
+                    }";
+                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+
+                // act
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+
+                // assert
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(1, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleThreadsThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
+        {
+            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                // arrange
+                var source = @"
+                    namespace " + sourceNamespace + @"
+                    {
+                        using System;
+                        using System.Threading;
+                        using EmbeddedFx;
+
+                        public class " + sourceClassName + @" : MarshalByRefObject
+                        {
+                            public " + sourceClassName + @"()
+                            {
+                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                Thread.Sleep(100);
+                            }
+
+                            private static void CallRegisterThenSleepForFiveHundredMilliseconds()
+                            {
+                                EmbeddedAssemblyLoader.Register();
+                                Thread.Sleep(500);
+                            }
+                        }
+                    }";
+                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, false, "System.dll", embeddedFxFileInfo.Name);
+
+                // act
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+
+                // assert
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
+                this.AssertAppDomainHasAssemblyResolveEventSubscribers(1, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
         private void ExecuteTestInsideTestAppDomain(Action<TestSetup> action)
         {
             IsolatedStorageWrapper isolatedStorageWrapper = null;
