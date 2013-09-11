@@ -25,11 +25,11 @@ namespace EmbeddedFx.Facts.Support
 
     internal static class CSharpCompiler
     {
-        public static void Compile(string source, string outputAssembly, bool generateExecutable, params string[] referencedAssemblies)
+        public static void Compile(string source, string outputAssembly, params string[] referencedAssemblies)
         {
             using (var provider = new CSharpCodeProvider())
             {
-                var parameters = CSharpCompiler.GetCompilerParameters(outputAssembly, generateExecutable);
+                var parameters = CSharpCompiler.GetCompilerParameters(outputAssembly);
 
                 CSharpCompiler.AddReferencedAssemblies(parameters, referencedAssemblies);
 
@@ -44,7 +44,7 @@ namespace EmbeddedFx.Facts.Support
             }
         }
 
-        private static CompilerParameters GetCompilerParameters(string outputAssembly, bool generateExecutable)
+        private static CompilerParameters GetCompilerParameters(string outputAssembly)
         {
             return new CompilerParameters()
             {
@@ -53,7 +53,7 @@ namespace EmbeddedFx.Facts.Support
                 GenerateInMemory = false,
                 IncludeDebugInformation = false,
                 OutputAssembly = outputAssembly,
-                GenerateExecutable = generateExecutable
+                GenerateExecutable = false
             };
         }
 
