@@ -20,16 +20,19 @@ namespace EmbeddedFx.Facts.Support
     using System;
     using System.CodeDom.Compiler;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Text;
     using Microsoft.CSharp;
 
     internal static class CSharpCompiler
     {
-        public static void Compile(string source, string outputAssembly, params string[] referencedAssemblies)
+        public static void Compile(string source, string outputAssembly, IEnumerable<string> embeddedResources, IEnumerable<string> referencedAssemblies)
         {
             using (var provider = new CSharpCodeProvider())
             {
                 var parameters = CSharpCompiler.GetCompilerParameters(outputAssembly);
+
+                CSharpCompiler.AddEmbeddedResources(parameters, embeddedResources);
 
                 CSharpCompiler.AddReferencedAssemblies(parameters, referencedAssemblies);
 
@@ -57,8 +60,26 @@ namespace EmbeddedFx.Facts.Support
             };
         }
 
-        private static void AddReferencedAssemblies(CompilerParameters parameters, params string[] referencedAssemblies)
+        private static void AddEmbeddedResources(CompilerParameters parameters, IEnumerable<string> embeddedResources)
         {
+            if (embeddedResources == null)
+            {
+                return;
+            }
+
+            foreach (var embeddedResource in embeddedResources)
+            {
+                parameters.EmbeddedResources.Add(embeddedResource);
+            }
+        }
+
+        private static void AddReferencedAssemblies(CompilerParameters parameters, IEnumerable<string> referencedAssemblies)
+        {
+            if (referencedAssemblies == null)
+            {
+                return;
+            }
+
             foreach (var referencedAssembly in referencedAssemblies)
             {
                 parameters.ReferencedAssemblies.Add(referencedAssembly);

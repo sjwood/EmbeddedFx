@@ -18,6 +18,7 @@
 namespace EmbeddedFx.Facts
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.IO.IsolatedStorage;
     using System.Reflection;
@@ -45,14 +46,15 @@ namespace EmbeddedFx.Facts
                         {
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
 
                 // assert
-                var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(embeddedFxFileInfo.FullName);
+                var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(new FileInfo("EmbeddedFx.dll").FullName);
                 this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, embeddedFxAssemblyName);
                 this.AssertAppDomainHasLoadedAssemblyName(false, ts.TestAppDomain, embeddedFxAssemblyName);
             };
@@ -84,14 +86,15 @@ namespace EmbeddedFx.Facts
                                 }
                             }
                         }";
-                    var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                    var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                    var embeddedResources = new string[] { };
+                    var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                    var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                     // act
                     var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
                     
                     // assert
-                    var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(embeddedFxFileInfo.FullName);
+                    var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(new FileInfo("EmbeddedFx.dll").FullName);
                     this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, embeddedFxAssemblyName);
                     this.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, embeddedFxAssemblyName);
                 };
@@ -118,8 +121,9 @@ namespace EmbeddedFx.Facts
                         {
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -156,8 +160,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -196,8 +201,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -260,8 +266,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -308,8 +315,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -351,8 +359,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -396,8 +405,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -443,8 +453,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -514,8 +525,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -569,8 +581,9 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedFxFileInfo = new FileInfo(".\\EmbeddedFx.dll");
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, "System.dll", embeddedFxFileInfo.Name);
+                var embeddedResources = new string[] { };
+                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
 
                 // act
                 var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
@@ -635,11 +648,11 @@ namespace EmbeddedFx.Facts
             Assert.Equal(expected, subscriberCount);
         }
 
-        private FileInfo CompileCodeIntoAppDomainsPath(AppDomain appDomain, string source, params string[] referencedAssemblies)
+        private FileInfo CompileCodeIntoAppDomainsPath(AppDomain appDomain, string source, IEnumerable<string> embeddedResources, IEnumerable<string> referencedAssemblies)
         {
             var binaryPath = Path.Combine(appDomain.BaseDirectory, string.Format("{0}.dll", Guid.NewGuid()));
 
-            CSharpCompiler.Compile(source, binaryPath, referencedAssemblies);
+            CSharpCompiler.Compile(source, binaryPath, embeddedResources, referencedAssemblies);
 
             return new FileInfo(binaryPath);
         }
