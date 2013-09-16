@@ -31,27 +31,27 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldNotBeLoadedIntoAppDomain()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(new FileInfo("EmbeddedFx.dll").FullName);
@@ -66,32 +66,32 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderThenEmbeddedFxShouldBeLoadedIntoAppDomain()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
                 {
                     // arrange
-                    var source = @"
-                        namespace " + sourceNamespace + @"
+                    var testSource = @"
+                        namespace " + testNamespace + @"
                         {
                             using System;
                             using EmbeddedFx;
 
-                            public class " + sourceClassName + @" : MarshalByRefObject
+                            public class " + testClassName + @" : MarshalByRefObject
                             {
-                                public " + sourceClassName + @"()
+                                public " + testClassName + @"()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
                             }
                         }";
-                    var embeddedResources = new string[] { };
-                    var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                    var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                    var testEmbeddedResources = new string[] { };
+                    var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                     // act
-                    var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                    var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
                     
                     // assert
                     var embeddedFxAssemblyName = AssemblyName.GetAssemblyName(new FileInfo("EmbeddedFx.dll").FullName);
@@ -106,27 +106,27 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeZero()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -140,32 +140,32 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
                                 EmbeddedAssemblyLoader.Register();
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -179,21 +179,21 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
                                 EmbeddedAssemblyLoader.Register();
                                 EmbeddedAssemblyLoader.Register();
@@ -201,12 +201,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -220,25 +220,25 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleTypesThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                new " + sourceClassName + @".A();
-                                new " + sourceClassName + @".B();
-                                new " + sourceClassName + @".C();
+                                new " + testClassName + @".A();
+                                new " + testClassName + @".B();
+                                new " + testClassName + @".C();
                             }
 
                             private class A
@@ -266,12 +266,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -285,26 +285,26 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleThreadsThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Threading;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
                                 Thread.Sleep(100);
                             }
 
@@ -315,12 +315,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -334,23 +334,23 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderButHasItsOwnAssemblyResolveEventHandlerThenAppDomainAssemblyResolveEventSubscriberCountShouldBeOne()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Reflection;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                AppDomain.CurrentDomain.AssemblyResolve += " + sourceClassName + @".OwnAssemblyResolveEventHandler;
+                                AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
                             }
 
                             private static Assembly OwnAssemblyResolveEventHandler(object sender, ResolveEventArgs args)
@@ -359,12 +359,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -378,24 +378,24 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderAndHasItsOwnAssemblyResolveEventHandlerThenAppDomainAssemblyResolveEventSubscriberCountShouldBeTwo()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Reflection;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                AppDomain.CurrentDomain.AssemblyResolve += " + sourceClassName + @".OwnAssemblyResolveEventHandler;
+                                AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
                                 EmbeddedAssemblyLoader.Register();
                             }
 
@@ -405,12 +405,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -424,24 +424,24 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderAndHasItsOwnAssemblyResolveEventHandlerThenAppDomainAssemblyResolveEventSubscriberCountShouldBeTwo()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Reflection;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                AppDomain.CurrentDomain.AssemblyResolve += " + sourceClassName + @".OwnAssemblyResolveEventHandler;
+                                AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
                                 EmbeddedAssemblyLoader.Register();
                                 EmbeddedAssemblyLoader.Register();
                                 EmbeddedAssemblyLoader.Register();
@@ -453,12 +453,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -472,27 +472,27 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleTypesAndHasItsOwnAssemblyResolveEventHandlerThenAppDomainAssemblyResolveEventSubscriberCountShouldBeTwo()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Reflection;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                AppDomain.CurrentDomain.AssemblyResolve += " + sourceClassName + @".OwnAssemblyResolveEventHandler;
-                                new " + sourceClassName + @".A();
-                                new " + sourceClassName + @".B();
-                                new " + sourceClassName + @".C();
+                                AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
+                                new " + testClassName + @".A();
+                                new " + testClassName + @".B();
+                                new " + testClassName + @".C();
                             }
 
                             private static Assembly OwnAssemblyResolveEventHandler(object sender, ResolveEventArgs args)
@@ -525,12 +525,12 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
@@ -544,28 +544,28 @@ namespace EmbeddedFx.Facts
         [Trait("Assembly", "EmbeddedFx")]
         public void WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoaderFromMultipleThreadsAndHasItsOwnAssemblyResolveEventHandlerThenAppDomainAssemblyResolveEventSubscriberCountShouldBeTwo()
         {
-            var sourceNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
-            var sourceClassName = MethodBase.GetCurrentMethod().Name;
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
 
             Action<TestSetup> testSetup = (ts) =>
             {
                 // arrange
-                var source = @"
-                    namespace " + sourceNamespace + @"
+                var testSource = @"
+                    namespace " + testNamespace + @"
                     {
                         using System;
                         using System.Reflection;
                         using System.Threading;
                         using EmbeddedFx;
 
-                        public class " + sourceClassName + @" : MarshalByRefObject
+                        public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + sourceClassName + @"()
+                            public " + testClassName + @"()
                             {
-                                AppDomain.CurrentDomain.AssemblyResolve += " + sourceClassName + @".OwnAssemblyResolveEventHandler;
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + sourceClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
                                 Thread.Sleep(100);
                             }
 
@@ -581,16 +581,326 @@ namespace EmbeddedFx.Facts
                             }
                         }
                     }";
-                var embeddedResources = new string[] { };
-                var referencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
-                var testBinary = this.CompileCodeIntoAppDomainsPath(ts.TestAppDomain, source, embeddedResources, referencedAssemblies);
+                var testEmbeddedResources = new string[] { };
+                var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll" };
+                var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                 // act
-                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", sourceNamespace, sourceClassName));
+                var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
 
                 // assert
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(0, ts.ParentAppDomain);
                 this.AssertAppDomainHasAssemblyResolveEventSubscribers(2, ts.TestAppDomain);
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderAndRefersToATypeThatIsNotEmbeddedAsAResourceShouldThrow()
+        {
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                FileInfo libraryBinary = null;
+                try
+                {
+                    // arrange
+                    var librarySource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                public class LibraryType
+                                {
+                                }
+                            }";
+                    var libraryEmbeddedResources = new string[] { };
+                    var libraryReferencedAssemblies = new string[] { };
+                    libraryBinary = this.CompileCodeIntoLocation(librarySource, libraryEmbeddedResources, libraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var testSource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                using System;
+ 
+                                public class " + testClassName + @" : MarshalByRefObject
+                                {
+                                    public " + testClassName + @"()
+                                    {
+                                        new LibraryType();
+                                    }
+                                }
+                            }";
+                    var testEmbeddedResources = new string[] { };
+                    var testReferencedAssemblies = new string[] { "System.dll", libraryBinary.FullName };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
+
+                    Exception thrownException = null;
+
+                    // act
+                    try
+                    {
+                        var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
+                    }
+                    catch (TargetInvocationException tie)
+                    {
+                        thrownException = tie;
+                    }
+                    catch (Exception e)
+                    {
+                        Assert.True(false, string.Format("An unexpected exception occurred: {0}", e.Message));
+                    }
+
+                    // assert
+                    Assert.NotNull(thrownException);
+                    Assert.NotNull(thrownException.InnerException);
+                    Assert.Equal(typeof(FileNotFoundException), thrownException.InnerException.GetType());
+                    Assert.Equal(string.Format("Could not load file or assembly '{0}' or one of its dependencies. The system cannot find the file specified.", AssemblyName.GetAssemblyName(libraryBinary.FullName)), thrownException.InnerException.Message);
+                }
+                finally
+                {
+                    ActOnObject.IfNotNull(
+                        libraryBinary,
+                        (fi) =>
+                        {
+                            if (fi.Exists)
+                            {
+                                fi.Delete();
+                            };
+                        });
+                }
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoaderAndRefersToATypeThatIsEmbeddedAsAResourceShouldThrow()
+        {
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                FileInfo libraryBinary = null;
+                try
+                {
+                    // arrange
+                    var librarySource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                public class LibraryType
+                                {
+                                }
+                            }";
+                    var libraryEmbeddedResources = new string[] { };
+                    var libraryReferencedAssemblies = new string[] { };
+                    libraryBinary = this.CompileCodeIntoLocation(librarySource, libraryEmbeddedResources, libraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var testSource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                using System;
+ 
+                                public class " + testClassName + @" : MarshalByRefObject
+                                {
+                                    public " + testClassName + @"()
+                                    {
+                                        new LibraryType();
+                                    }
+                                }
+                            }";
+                    var testEmbeddedResources = new string[] { libraryBinary.FullName };
+                    var testReferencedAssemblies = new string[] { "System.dll", libraryBinary.FullName };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
+
+                    Exception thrownException = null;
+
+                    // act
+                    try
+                    {
+                        var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
+                    }
+                    catch (TargetInvocationException tie)
+                    {
+                        thrownException = tie;
+                    }
+                    catch (Exception e)
+                    {
+                        Assert.True(false, string.Format("An unexpected exception occurred: {0}", e.Message));
+                    }
+
+                    // assert
+                    Assert.NotNull(thrownException);
+                    Assert.NotNull(thrownException.InnerException);
+                    Assert.Equal(typeof(FileNotFoundException), thrownException.InnerException.GetType());
+                    Assert.Equal(string.Format("Could not load file or assembly '{0}' or one of its dependencies. The system cannot find the file specified.", AssemblyName.GetAssemblyName(libraryBinary.FullName)), thrownException.InnerException.Message);
+                }
+                finally
+                {
+                    ActOnObject.IfNotNull(
+                        libraryBinary,
+                        (fi) =>
+                        {
+                            if (fi.Exists)
+                            {
+                                fi.Delete();
+                            };
+                        });
+                }
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderAndRefersToATypeThatIsNotEmbeddedAsAResourceShouldThrow()
+        {
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                FileInfo libraryBinary = null;
+                try
+                {
+                    // arrange
+                    var librarySource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                public class LibraryType
+                                {
+                                }
+                            }";
+                    var libraryEmbeddedResources = new string[] { };
+                    var libraryReferencedAssemblies = new string[] { };
+                    libraryBinary = this.CompileCodeIntoLocation(librarySource, libraryEmbeddedResources, libraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var testSource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                using System;
+                                using EmbeddedFx;
+ 
+                                public class " + testClassName + @" : MarshalByRefObject
+                                {
+                                    public " + testClassName + @"()
+                                    {
+                                        EmbeddedAssemblyLoader.Register();
+                                        new LibraryType();
+                                    }
+                                }
+                            }";
+                    var testEmbeddedResources = new string[] { };
+                    var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll", libraryBinary.FullName };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
+
+                    Exception thrownException = null;
+
+                    // act
+                    try
+                    {
+                        var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
+                    }
+                    catch (TargetInvocationException tie)
+                    {
+                        thrownException = tie;
+                    }
+                    catch (Exception e)
+                    {
+                        Assert.True(false, string.Format("An unexpected exception occurred: {0}", e.Message));
+                    }
+
+                    // assert
+                    Assert.NotNull(thrownException);
+                    Assert.NotNull(thrownException.InnerException);
+                    Assert.Equal(typeof(FileNotFoundException), thrownException.InnerException.GetType());
+                    Assert.Equal(string.Format("Could not load file or assembly '{0}' or one of its dependencies. The system cannot find the file specified.", AssemblyName.GetAssemblyName(libraryBinary.FullName)), thrownException.InnerException.Message);
+                }
+                finally
+                {
+                    ActOnObject.IfNotNull(
+                        libraryBinary,
+                        (fi) =>
+                        {
+                            if (fi.Exists)
+                            {
+                                fi.Delete();
+                            };
+                        });
+                }
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact(Skip = "Implementation missing in EmbeddedAssemblyLoader")]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderAndRefersToATypeThatIsEmbeddedAsAResourceThenEmbeddedResourceAssemblyShouldBeLoadedIntoAppDomain()
+        {
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                FileInfo libraryBinary = null;
+                try
+                {
+                    // arrange
+                    var librarySource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                public class LibraryType
+                                {
+                                }
+                            }";
+                    var libraryEmbeddedResources = new string[] { };
+                    var libraryReferencedAssemblies = new string[] { };
+                    libraryBinary = this.CompileCodeIntoLocation(librarySource, libraryEmbeddedResources, libraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var testSource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                using System;
+                                using EmbeddedFx;
+ 
+                                public class " + testClassName + @" : MarshalByRefObject
+                                {
+                                    public " + testClassName + @"()
+                                    {
+                                        EmbeddedAssemblyLoader.Register();
+                                        new LibraryType();
+                                    }
+                                }
+                            }";
+                    var testEmbeddedResources = new string[] { libraryBinary.FullName };
+                    var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll", libraryBinary.FullName };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
+
+                    // act
+                    var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
+
+                    // assert
+                    var libraryBinaryAssemblyName = AssemblyName.GetAssemblyName(libraryBinary.FullName);
+                    this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, libraryBinaryAssemblyName);
+                    this.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, libraryBinaryAssemblyName);
+                }
+                finally
+                {
+                    ActOnObject.IfNotNull(
+                        libraryBinary,
+                        (fi) =>
+                        {
+                            if (fi.Exists)
+                            {
+                                fi.Delete();
+                            };
+                        });
+                }
             };
 
             this.ExecuteTestInsideTestAppDomain(testSetup);
@@ -648,9 +958,14 @@ namespace EmbeddedFx.Facts
             Assert.Equal(expected, subscriberCount);
         }
 
-        private FileInfo CompileCodeIntoAppDomainsPath(AppDomain appDomain, string source, IEnumerable<string> embeddedResources, IEnumerable<string> referencedAssemblies)
+        private FileInfo CompileCodeIntoLocation(string source, IEnumerable<string> embeddedResources, IEnumerable<string> referencedAssemblies, DirectoryInfo location)
         {
-            var binaryPath = Path.Combine(appDomain.BaseDirectory, string.Format("{0}.dll", Guid.NewGuid()));
+            if (!location.Exists)
+            {
+                throw new ArgumentException(string.Format("Directory '{0}' does not exist", location.FullName), "location");
+            }
+
+            var binaryPath = Path.Combine(location.FullName, string.Format("{0}.dll", Guid.NewGuid()));
 
             CSharpCompiler.Compile(source, binaryPath, embeddedResources, referencedAssemblies);
 
