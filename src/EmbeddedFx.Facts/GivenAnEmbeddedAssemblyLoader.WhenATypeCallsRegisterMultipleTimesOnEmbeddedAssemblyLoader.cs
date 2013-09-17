@@ -18,9 +18,7 @@
 namespace EmbeddedFx.Facts
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
-    using System.IO.IsolatedStorage;
     using System.Reflection;
     using EmbeddedFx.Facts.Support;
     using Xunit;
