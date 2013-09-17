@@ -741,15 +741,7 @@ namespace EmbeddedFx.Facts
                 }
                 finally
                 {
-                    ActOnObject.IfNotNull(
-                        libraryBinary,
-                        (fi) =>
-                        {
-                            if (fi.Exists)
-                            {
-                                fi.Delete();
-                            };
-                        });
+                    ActOnObject.IfNotNull(libraryBinary, (fi) => fi.Delete());
                 }
             };
 
@@ -823,15 +815,7 @@ namespace EmbeddedFx.Facts
                 }
                 finally
                 {
-                    ActOnObject.IfNotNull(
-                        libraryBinary,
-                        (fi) =>
-                        {
-                            if (fi.Exists)
-                            {
-                                fi.Delete();
-                            };
-                        });
+                    ActOnObject.IfNotNull(libraryBinary, (fi) => fi.Delete());
                 }
             };
 
@@ -891,15 +875,84 @@ namespace EmbeddedFx.Facts
                 }
                 finally
                 {
-                    ActOnObject.IfNotNull(
-                        libraryBinary,
-                        (fi) =>
-                        {
-                            if (fi.Exists)
+                    ActOnObject.IfNotNull(libraryBinary, (fi) => fi.Delete());
+                }
+            };
+
+            this.ExecuteTestInsideTestAppDomain(testSetup);
+        }
+
+        [Fact(Skip = "Implementation missing in EmbeddedAssemblyLoader")]
+        [Trait("Assembly", "EmbeddedFx")]
+        public void WhenATypeCallsRegisterOnEmbeddedAssemblyLoaderAndRefersToATypeThatIsEmbeddedAsANestedEmbeddedResourceThenEmbeddedResourceAssemblyShouldBeLoadedIntoAppDomain()
+        {
+            var testNamespace = MethodBase.GetCurrentMethod().DeclaringType.Namespace;
+            var testClassName = MethodBase.GetCurrentMethod().Name;
+
+            Action<TestSetup> testSetup = (ts) =>
+            {
+                FileInfo nestedLibraryBinary = null;
+                FileInfo libraryBinary = null;
+                try
+                {
+                    // arrange
+                    var nestedLibrarySource = @"
+                            namespace " + testNamespace + @"
                             {
-                                fi.Delete();
-                            };
-                        });
+                                public class NestedLibraryType
+                                {
+                                }
+                            }";
+                    var nestedLibraryEmbeddedResources = new string[] { };
+                    var nestedLibraryReferencedAssemblies = new string[] { };
+                    nestedLibraryBinary = this.CompileCodeIntoLocation(nestedLibrarySource, nestedLibraryEmbeddedResources, nestedLibraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var librarySource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                public class LibraryType
+                                {
+                                }
+                            }";
+                    var libraryEmbeddedResources = new string[] { nestedLibraryBinary.FullName };
+                    var libraryReferencedAssemblies = new string[] { };
+                    libraryBinary = this.CompileCodeIntoLocation(librarySource, libraryEmbeddedResources, libraryReferencedAssemblies, new DirectoryInfo(Path.GetTempPath()));
+
+                    var testSource = @"
+                            namespace " + testNamespace + @"
+                            {
+                                using System;
+                                using EmbeddedFx;
+ 
+                                public class " + testClassName + @" : MarshalByRefObject
+                                {
+                                    public " + testClassName + @"()
+                                    {
+                                        EmbeddedAssemblyLoader.Register();
+                                        new NestedLibraryType();
+                                    }
+                                }
+                            }";
+                    var testEmbeddedResources = new string[] { libraryBinary.FullName };
+                    var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll", libraryBinary.FullName };
+                    var testBinary = this.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
+
+                    // act
+                    var proxy = ts.TestAppDomain.CreateInstanceFromAndUnwrap(testBinary.FullName, string.Format("{0}.{1}", testNamespace, testClassName));
+
+                    // assert
+                    var libraryBinaryAssemblyName = AssemblyName.GetAssemblyName(libraryBinary.FullName);
+                    this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, libraryBinaryAssemblyName);
+                    this.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, libraryBinaryAssemblyName);
+
+                    var nestedLibraryBinaryAssemblyName = AssemblyName.GetAssemblyName(nestedLibraryBinary.FullName);
+                    this.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, nestedLibraryBinaryAssemblyName);
+                    this.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, nestedLibraryBinaryAssemblyName);
+                }
+                finally
+                {
+                    ActOnObject.IfNotNull(libraryBinary, (fi) => fi.Delete());
+                    ActOnObject.IfNotNull(nestedLibraryBinary, (fi) => fi.Delete());
                 }
             };
 
