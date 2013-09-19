@@ -339,7 +339,7 @@ namespace EmbeddedFx.Facts
                                 }
                             }";
                         var testEmbeddedResources = new string[] { libraryBinary.FullName };
-                        var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll", libraryBinary.FullName };
+                        var testReferencedAssemblies = new string[] { "System.dll", "EmbeddedFx.dll", libraryBinary.FullName, nestedLibraryBinary.FullName };
                         var testBinary = GivenAnEmbeddedAssemblyLoader.CompileCodeIntoLocation(testSource, testEmbeddedResources, testReferencedAssemblies, new DirectoryInfo(ts.TestAppDomain.BaseDirectory));
 
                         // act

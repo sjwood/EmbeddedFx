@@ -296,9 +296,12 @@ Task Test -Depends Build -Description "Runs all tests." {
     foreach ($XunitTestReportFileInfo in $XunitTestReportDirectoryInfo.GetFiles("*.xunit.xml", [System.IO.SearchOption]::AllDirectories))
     {
         $SkippedTests = Select-Xml -XPath "/assembly/class/test[@result='Skip']" -Path $XunitTestReportFileInfo.FullName
-        foreach ($SkippedTest in $SkippedTests)
+        if ($SkippedTests -ne $Null)
         {
-            $HasSkippedTests = $True
+            foreach ($SkippedTest in $SkippedTests)
+            {
+                $HasSkippedTests = $True
+            }
         }
     }
 
