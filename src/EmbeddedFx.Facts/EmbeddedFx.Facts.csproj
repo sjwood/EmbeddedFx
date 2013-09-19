@@ -44,15 +44,15 @@ limitations under the License.
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.WhenATypeCallsRegisterOnEmbeddedAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\ActOnObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\AppDomainInfoProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\CSharpCompiler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\IsolatedStorageWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\TestAppDomain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\TestSetup.cs" />
-    <Compile Include="GivenAnEmbeddedAssemblyLoader.WhenATypeCallsRegisterMultipleTimesOnEmbeddedAssemblyLoader.cs" />
-    <Compile Include="GivenAnEmbeddedAssemblyLoader.WhenATypeCallsRegisterOnEmbeddedAssemblyLoader.cs" />
-    <Compile Include="GivenAnEmbeddedAssemblyLoader.WhenATypeDoesNotCallRegisterOnEmbeddedAssemblyLoader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
 </Project>
