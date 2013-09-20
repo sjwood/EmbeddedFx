@@ -17,13 +17,29 @@ limitations under the License.
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
   <PropertyGroup>
-    <AssemblyName>SimpleLib</AssemblyName>
-    <OutputType>Library</OutputType>
-    <ProjectGuid>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</ProjectGuid>
+    <AssemblyName>Program.WithEmbeddedComplexLib</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <ProjectGuid>{81134e1e-89b4-498b-8511-438935a94142}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Class1.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EmbeddedFx\EmbeddedFx.csproj">
+      <Project>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</Project>
+      <Name>EmbeddedFx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ComplexLib\ComplexLib.csproj">
+      <Project>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</Project>
+      <Name>ComplexLib</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)..\..\bin\$(SolutionName)\ComplexLib\ComplexLib.dll">
+      <Link>ComplexLib.dll</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
 </Project>

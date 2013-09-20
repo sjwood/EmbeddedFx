@@ -23,7 +23,7 @@ limitations under the License.
   <PropertyGroup>
     <AssemblyName>EmbeddedFx</AssemblyName>
     <OutputType>Library</OutputType>
-    <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
+    <ProjectGuid>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</ProjectGuid>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />

@@ -15,11 +15,11 @@
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1634:FileHeaderMustShowCopyright", Justification = "Documentation ignored at present time.")]
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1639:FileHeaderMustHaveSummary", Justification = "Documentation ignored at present time.")]
 
-namespace Program.WithEmbeddedSimpleLib
+namespace Program.WithEmbeddedComplexLib
 {
     using System;
+    using ComplexLib;
     using EmbeddedFx;
-    using SimpleLib;
 
     public class Program
     {
@@ -32,7 +32,7 @@ namespace Program.WithEmbeddedSimpleLib
         {
             try
             {
-                new Class1();
+                new Class2();
             }
             catch (Exception e)
             {

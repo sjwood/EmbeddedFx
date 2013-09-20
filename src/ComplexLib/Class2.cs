@@ -15,32 +15,17 @@
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1634:FileHeaderMustShowCopyright", Justification = "Documentation ignored at present time.")]
 [module: System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1639:FileHeaderMustHaveSummary", Justification = "Documentation ignored at present time.")]
 
-namespace Program.WithEmbeddedSimpleLib
+namespace ComplexLib
 {
     using System;
-    using EmbeddedFx;
     using SimpleLib;
 
-    public class Program
+    public sealed class Class2
     {
-        static Program()
+        public Class2()
         {
-            EmbeddedAssemblyLoader.Register();
-        }
-
-        public static int Main(string[] args)
-        {
-            try
-            {
-                new Class1();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("An exception was thrown: {0}", e.Message);
-                return 1;
-            }
-
-            return 0;
+            Console.WriteLine("Type '{0}' instantiated from Assembly '{1}'.", this.GetType().FullName, this.GetType().Assembly.FullName);
+            new Class1();
         }
     }
 }

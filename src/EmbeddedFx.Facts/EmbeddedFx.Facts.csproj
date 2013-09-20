@@ -15,32 +15,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+
   <PropertyGroup>
     <AssemblyName>EmbeddedFx.Facts</AssemblyName>
     <OutputType>Library</OutputType>
-    <ProjectGuid>{5957A810-10E6-4BDD-B451-A04F4CEA0686}</ProjectGuid>
+    <ProjectGuid>{5957a810-10e6-4bdd-b451-a04f4cea0686}</ProjectGuid>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
+
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)..\EmbeddedFx\EmbeddedFx.csproj">
       <Project>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</Project>
       <Name>EmbeddedFx</Name>
     </ProjectReference>
   </ItemGroup>
+
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
+  
   <ItemGroup>
     <MandatoryProperties Include="XunitDirectory">
       <InProject>false</InProject>
     </MandatoryProperties>
   </ItemGroup>
+  
   <ItemGroup>
     <Reference Include="xunit">
       <HintPath>$(XunitDirectory)xunit.dll</HintPath>
     </Reference>
   </ItemGroup>
+  
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GivenAnEmbeddedAssemblyLoader.cs" />
@@ -54,5 +62,7 @@ limitations under the License.
     <Compile Include="$(MSBuildThisFileDirectory)Support\TestAppDomain.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Support\TestSetup.cs" />
   </ItemGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
+  
 </Project>

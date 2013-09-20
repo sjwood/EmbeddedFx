@@ -19,14 +19,11 @@ limitations under the License.
   <PropertyGroup>
     <AssemblyName>Program.WithEmbeddedSimpleLib</AssemblyName>
     <OutputType>Exe</OutputType>
-    <ProjectGuid>{CE7A9962-2422-4F0A-A9CF-3437D52CC75A}</ProjectGuid>
+    <ProjectGuid>{ce7a9962-2422-4f0a-a9cf-3437d52cc75a}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EmbeddedFx\EmbeddedFx.csproj">
