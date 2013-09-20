@@ -19,9 +19,9 @@ limitations under the License.
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
   
   <PropertyGroup>
-    <AssemblyName>Program.WithEmbeddedComplexLib</AssemblyName>
+    <AssemblyName>Program.WithEmbeddedComplexLib.UsingSimpleLib</AssemblyName>
     <OutputType>Exe</OutputType>
-    <ProjectGuid>{81134e1e-89b4-498b-8511-438935a94142}</ProjectGuid>
+    <ProjectGuid>{fe85944f-1948-44b3-a736-18a3aab3bac2}</ProjectGuid>
   </PropertyGroup>
   
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
@@ -35,9 +35,9 @@ limitations under the License.
       <Project>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</Project>
       <Name>EmbeddedFx</Name>
     </ProjectReference>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)..\ComplexLib\ComplexLib.csproj">
-      <Project>{e5e9e599-6580-4337-ac09-c140b6fb5dd1}</Project>
-      <Name>ComplexLib</Name>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\SimpleLib\SimpleLib.csproj">
+      <Project>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</Project>
+      <Name>SimpleLib</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>

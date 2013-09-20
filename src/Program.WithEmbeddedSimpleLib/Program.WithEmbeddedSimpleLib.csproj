@@ -15,31 +15,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+  
   <PropertyGroup>
     <AssemblyName>Program.WithEmbeddedSimpleLib</AssemblyName>
     <OutputType>Exe</OutputType>
     <ProjectGuid>{ce7a9962-2422-4f0a-a9cf-3437d52cc75a}</ProjectGuid>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
+  
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Program.cs" />
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\EmbeddedFx\EmbeddedFx.csproj">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\EmbeddedFx\EmbeddedFx.csproj">
       <Project>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</Project>
       <Name>EmbeddedFx</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SimpleLib\SimpleLib.csproj">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\SimpleLib\SimpleLib.csproj">
       <Project>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</Project>
       <Name>SimpleLib</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)..\..\bin\$(SolutionName)\SimpleLib\SimpleLib.dll">
       <Link>SimpleLib.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
+  
 </Project>

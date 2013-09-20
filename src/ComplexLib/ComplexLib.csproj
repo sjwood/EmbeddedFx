@@ -15,27 +15,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+  
   <PropertyGroup>
     <AssemblyName>ComplexLib</AssemblyName>
     <OutputType>Library</OutputType>
     <ProjectGuid>{e5e9e599-6580-4337-ac09-c140b6fb5dd1}</ProjectGuid>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
+  
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Class2.cs" />
   </ItemGroup>
+  
   <ItemGroup>
-    <ProjectReference Include="..\SimpleLib\SimpleLib.csproj">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\SimpleLib\SimpleLib.csproj">
       <Project>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</Project>
       <Name>SimpleLib</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
+  
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)..\..\bin\$(SolutionName)\SimpleLib\SimpleLib.dll">
       <Link>SimpleLib.dll</Link>
     </EmbeddedResource>
   </ItemGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
+  
 </Project>

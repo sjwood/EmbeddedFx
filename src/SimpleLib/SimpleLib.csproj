@@ -15,15 +15,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+
   <PropertyGroup>
     <AssemblyName>SimpleLib</AssemblyName>
     <OutputType>Library</OutputType>
     <ProjectGuid>{d9b9c6ca-f0fa-44e9-8ced-27cfaba30148}</ProjectGuid>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
+  
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Class1.cs" />
   </ItemGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
+  
 </Project>
