@@ -14,9 +14,12 @@
 
 
 @ECHO OFF
+SETLOCAL
 
 
 call "%~dp0build.cmd" %* -properties @{'Verbose'=$True}
 SET EXITCODE=%ERRORLEVEL%
 ECHO.
 ECHO Exited with ErrorCode=%EXITCODE%
+
+ENDLOCAL

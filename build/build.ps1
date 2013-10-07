@@ -249,7 +249,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
     foreach ($SolutionFileInfo in $SolutionDirectoryInfo.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFileInfo.FullName + "'")
-        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:$MSBuildVerbosity /maxcpucount /property:Configuration=$Configuration /property:Platform=$Platform
+        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:$MSBuildVerbosity /maxcpucount /nodereuse:false /property:Configuration=$Configuration /property:Platform=$Platform
         if ($LastExitCode -ne 0)
         {
             Exit 1

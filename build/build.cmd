@@ -14,6 +14,7 @@
 
 
 @ECHO OFF
+SETLOCAL
 
 
 REM Set environment variables
@@ -70,3 +71,4 @@ GOTO END
 
 :END
 	EXIT /B %EXITCODE%
+	ENDLOCAL
