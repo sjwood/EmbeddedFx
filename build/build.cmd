@@ -27,20 +27,53 @@ IF NOT EXIST %WINDIR%\System32\WindowsPowerShell\v1.0\powershell.exe (
 	GOTO NO_POSH_V2
 )
 Powershell ^
-if ($Host.Version.Major -lt 2) ^
+$ErrorActionPreference = """Stop"""; ^
+if ($Host.Version.Major -ge 2) ^
 { ^
-  Exit 1; ^
+  Exit 0; ^
 } ^
-Exit 0;
+Exit 1;
 SET EXITCODE=%ERRORLEVEL%
 IF %EXITCODE% GTR 0 (
 	GOTO NO_POSH_V2
 )
 
 
+REM Check for .NET Framework 4.0 (Full Framework)
+Powershell ^
+$ErrorActionPreference = """Stop"""; ^
+if ((Test-Path -Path """HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4""") -eq $True) ^
+{ ^
+  if ((Test-Path -Path """HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full""") -eq $True) ^
+  { ^
+    Exit 0; ^
+  } ^
+} ^
+Exit 1;
+SET EXITCODE=%ERRORLEVEL%
+IF %EXITCODE% GTR 0 (
+	GOTO NO_NETFX_V4
+)
+
+
+REM Check for .NET Framework 3.5 (can't do multitarget build for .NET Framework 2.0 otherwise...)
+Powershell ^
+$ErrorActionPreference = """Stop"""; ^
+if ((Test-Path -Path """HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5""") -eq $True) ^
+{ ^
+  Exit 0; ^
+} ^
+Exit 1;
+SET EXITCODE=%ERRORLEVEL%
+IF %EXITCODE% GTR 0 (
+	GOTO NO_NETFX_V35
+)
+
+
 REM Run psake
 PUSHD %~dp0
 Powershell -Version 2.0 ^
+$ErrorActionPreference = """Stop"""; ^
 $CurrentExecutionPolicy = Get-ExecutionPolicy -Scope CurrentUser; ^
 if ($CurrentExecutionPolicy -gt [Microsoft.PowerShell.ExecutionPolicy]::RemoteSigned) ^
 { ^
@@ -65,7 +98,17 @@ GOTO END
 
 
 :NO_POSH_V2
-	ECHO PowerShell version 2 or greater required. Install it from http://www.microsoft.com/powershell. 1>&2
+	ECHO PowerShell version 2 or greater is required. Install it from http://www.microsoft.com/powershell. 1>&2
+	GOTO END
+
+
+:NO_NETFX_V4
+	ECHO .NET Framework version 4 (Full Framework) or greater is required. Install it from http://www.microsoft.com/net/download/version-4. 1>&2
+	GOTO END
+
+
+:NO_NETFX_V35
+	ECHO .NET Framework version 3.5 is required. Install it from http://www.microsoft.com/download/details.aspx?id=22. 1>&2
 	GOTO END
 
 
