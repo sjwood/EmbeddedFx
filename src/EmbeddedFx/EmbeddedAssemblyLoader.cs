@@ -18,6 +18,8 @@
 namespace EmbeddedFx
 {
     using System;
+    using System.Collections.Generic;
+    using System.Reflection;
 
     public static class EmbeddedAssemblyLoader
     {
@@ -40,10 +42,57 @@ namespace EmbeddedFx
                     return;
                 }
 
-                AppDomain.CurrentDomain.AssemblyResolve += (sender, e) => null;
+                AppDomain.CurrentDomain.AssemblyResolve += EmbeddedAssemblyLoader.AssemblyResolveEventHandler;
 
                 EmbeddedAssemblyLoader.AlreadyRegistered = true;
             }
+        }
+
+        private static Assembly AssemblyResolveEventHandler(object sender, ResolveEventArgs args)
+        {
+            var appDomainAssemblies = (sender as AppDomain).GetAssemblies();
+
+            var embeddedResources = EmbeddedAssemblyLoader.GetAllEmbeddedResources(appDomainAssemblies);
+
+            //// TODO
+            //// inspect the embedded resources to find the required assembly
+
+            return null;
+        }
+
+        private static IEnumerable<EmbeddedResource> GetAllEmbeddedResources(IEnumerable<Assembly> assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                foreach (var embeddedResource in EmbeddedAssemblyLoader.GetEmbeddedResources(assembly))
+                {
+                    yield return embeddedResource;
+                }
+            }
+        }
+
+        private static IEnumerable<EmbeddedResource> GetEmbeddedResources(Assembly assembly)
+        {
+            foreach (var resourceName in assembly.GetManifestResourceNames())
+            {
+                if (EmbeddedAssemblyLoader.IsEmbeddedResource(assembly, resourceName))
+                {
+                    yield return new EmbeddedResource(assembly, resourceName);
+                }
+            }
+        }
+
+        private static bool HasFlag(ResourceLocation flag, ResourceLocation value)
+        {
+            return (value & flag) == flag;
+        }
+
+        private static bool IsEmbeddedResource(Assembly assembly, string resourceName)
+        {
+            var resourceLocation = assembly.GetManifestResourceInfo(resourceName).ResourceLocation;
+
+            return EmbeddedAssemblyLoader.HasFlag(ResourceLocation.Embedded, resourceLocation)
+                && EmbeddedAssemblyLoader.HasFlag(ResourceLocation.ContainedInManifestFile, resourceLocation);
         }
     }
 }

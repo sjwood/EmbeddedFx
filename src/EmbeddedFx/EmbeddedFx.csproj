@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
 <!--
 Copyright 2012-2013 Steve Wood
 
@@ -15,24 +14,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
-
   <PropertyGroup>
     <AssemblyName>EmbeddedFx</AssemblyName>
     <OutputType>Library</OutputType>
-    <ProjectGuid>{a4ec885a-267d-4f52-bffa-1c2c75de7792}</ProjectGuid>
+    <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
   </PropertyGroup>
-
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
-
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EmbeddedAssemblyLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmbeddedResource.cs" />
   </ItemGroup>
-
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
-
 </Project>
