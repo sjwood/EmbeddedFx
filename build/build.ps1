@@ -140,11 +140,11 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
     $Global:BuildProperties += ,("BinDirectory", ("{0}{1}bin{1}" -f $RootDirectory, $Global:DirectorySeparator))
     $Global:BuildProperties += ,("DocDirectory", ("{0}{1}doc{1}" -f $RootDirectory, $Global:DirectorySeparator))
 
-    $ToolsDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}tools" -f $RootDirectory, $Global:DirectorySeparator)
-    foreach ($ToolDirectoryInfo in $ToolsDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+    $LibsDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList ("{0}{1}lib" -f $RootDirectory, $Global:DirectorySeparator)
+    foreach ($LibDirectoryInfo in $LibsDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         $CurrentVersionDirectoryInfo = $Null
-        foreach ($VersionDirectoryInfo in $ToolDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
+        foreach ($VersionDirectoryInfo in $LibDirectoryInfo.GetDirectories("*", [System.IO.SearchOption]::TopDirectoryOnly))
         {
             if ($CurrentVersionDirectoryInfo -eq $Null -or $VersionDirectoryInfo.Name -gt $CurrentVersionDirectoryInfo.Name)
             {
@@ -154,7 +154,7 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
 
         if ($CurrentVersionDirectoryInfo -ne $Null)
         {
-            $Global:BuildProperties += ,(("{0}Directory" -f $ToolDirectoryInfo.Name), ("{0}{1}" -f $CurrentVersionDirectoryInfo.FullName, $Global:DirectorySeparator))
+            $Global:BuildProperties += ,(("{0}Directory" -f $LibDirectoryInfo.Name), ("{0}{1}" -f $CurrentVersionDirectoryInfo.FullName, $Global:DirectorySeparator))
         }
     }
 
