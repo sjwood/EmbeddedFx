@@ -46,7 +46,7 @@ namespace EmbeddedFx.Facts
 
                             public class " + testClassName + @" : MarshalByRefObject
                             {
-                                public " + testClassName + @"()
+                                static " + testClassName + @"()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -86,7 +86,7 @@ namespace EmbeddedFx.Facts
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + testClassName + @"()
+                            static " + testClassName + @"()
                             {
                                 EmbeddedAssemblyLoader.Register();
                             }
@@ -126,7 +126,7 @@ namespace EmbeddedFx.Facts
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + testClassName + @"()
+                            static " + testClassName + @"()
                             {
                                 AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
                                 EmbeddedAssemblyLoader.Register();
@@ -185,9 +185,13 @@ namespace EmbeddedFx.Facts
  
                                 public class " + testClassName + @" : MarshalByRefObject
                                 {
-                                    public " + testClassName + @"()
+                                    static " + testClassName + @"()
                                     {
                                         EmbeddedAssemblyLoader.Register();
+                                    }
+
+                                    public " + testClassName + @"()
+                                    {
                                         new LibraryType();
                                     }
                                 }
@@ -259,9 +263,13 @@ namespace EmbeddedFx.Facts
  
                                 public class " + testClassName + @" : MarshalByRefObject
                                 {
-                                    public " + testClassName + @"()
+                                    static " + testClassName + @"()
                                     {
                                         EmbeddedAssemblyLoader.Register();
+                                    }
+
+                                    public " + testClassName + @"()
+                                    {
                                         new LibraryType();
                                     }
                                 }
@@ -331,9 +339,13 @@ namespace EmbeddedFx.Facts
  
                                 public class " + testClassName + @" : MarshalByRefObject
                                 {
-                                    public " + testClassName + @"()
+                                    static " + testClassName + @"()
                                     {
                                         EmbeddedAssemblyLoader.Register();
+                                    }
+
+                                    public " + testClassName + @"()
+                                    {
                                         new NestedLibraryType();
                                     }
                                 }

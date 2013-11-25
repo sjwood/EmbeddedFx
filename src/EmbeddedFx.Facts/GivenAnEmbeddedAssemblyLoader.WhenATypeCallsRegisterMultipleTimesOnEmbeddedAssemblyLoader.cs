@@ -46,7 +46,7 @@ namespace EmbeddedFx.Facts
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + testClassName + @"()
+                            static " + testClassName + @"()
                             {
                                 EmbeddedAssemblyLoader.Register();
                                 EmbeddedAssemblyLoader.Register();
@@ -96,7 +96,7 @@ namespace EmbeddedFx.Facts
 
                             private class A
                             {
-                                public A()
+                                static A()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -104,7 +104,7 @@ namespace EmbeddedFx.Facts
 
                             private class B
                             {
-                                public B()
+                                static B()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -112,7 +112,7 @@ namespace EmbeddedFx.Facts
 
                             private class C
                             {
-                                public C()
+                                static C()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -148,23 +148,35 @@ namespace EmbeddedFx.Facts
                     namespace " + testNamespace + @"
                     {
                         using System;
+                        using System.Collections.Generic;
                         using System.Threading;
                         using EmbeddedFx;
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
+                            private IList<A> InstancesOfA;
+
                             public " + testClassName + @"()
                             {
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                Thread.Sleep(100);
+                                this.InstancesOfA = new List<A>();
+                                new Thread(this.SleepForFiveHundredMilliseconds).Start();
+                                new Thread(this.SleepForFiveHundredMilliseconds).Start();
+                                new Thread(this.SleepForFiveHundredMilliseconds).Start();
+                                Thread.Sleep(2000);
                             }
 
-                            private static void CallRegisterThenSleepForFiveHundredMilliseconds()
+                            private void SleepForFiveHundredMilliseconds()
                             {
-                                EmbeddedAssemblyLoader.Register();
-                                Thread.Sleep(500);
+                                this.InstancesOfA.Add(new A());
+                            }
+
+                            private class A
+                            {
+                                static A()
+                                {
+                                    EmbeddedAssemblyLoader.Register();
+                                    Thread.Sleep(500);
+                                }
                             }
                         }
                     }";
@@ -202,7 +214,7 @@ namespace EmbeddedFx.Facts
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
-                            public " + testClassName + @"()
+                            static " + testClassName + @"()
                             {
                                 AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
                                 EmbeddedAssemblyLoader.Register();
@@ -265,7 +277,7 @@ namespace EmbeddedFx.Facts
 
                             private class A
                             {
-                                public A()
+                                static A()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -273,7 +285,7 @@ namespace EmbeddedFx.Facts
 
                             private class B
                             {
-                                public B()
+                                static B()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -281,7 +293,7 @@ namespace EmbeddedFx.Facts
 
                             private class C
                             {
-                                public C()
+                                static C()
                                 {
                                     EmbeddedAssemblyLoader.Register();
                                 }
@@ -317,19 +329,23 @@ namespace EmbeddedFx.Facts
                     namespace " + testNamespace + @"
                     {
                         using System;
+                        using System.Collections.Generic;
                         using System.Reflection;
                         using System.Threading;
                         using EmbeddedFx;
 
                         public class " + testClassName + @" : MarshalByRefObject
                         {
+                            private IList<A> InstancesOfA;
+
                             public " + testClassName + @"()
                             {
+                                this.InstancesOfA = new List<A>();
                                 AppDomain.CurrentDomain.AssemblyResolve += " + testClassName + @".OwnAssemblyResolveEventHandler;
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                new Thread(" + testClassName + @".CallRegisterThenSleepForFiveHundredMilliseconds).Start();
-                                Thread.Sleep(100);
+                                new Thread(this.CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(this.CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                new Thread(this.CallRegisterThenSleepForFiveHundredMilliseconds).Start();
+                                Thread.Sleep(2000);
                             }
 
                             private static Assembly OwnAssemblyResolveEventHandler(object sender, ResolveEventArgs args)
@@ -337,10 +353,18 @@ namespace EmbeddedFx.Facts
                                 return null;
                             }
 
-                            private static void CallRegisterThenSleepForFiveHundredMilliseconds()
+                            private void CallRegisterThenSleepForFiveHundredMilliseconds()
                             {
-                                EmbeddedAssemblyLoader.Register();
-                                Thread.Sleep(500);
+                                this.InstancesOfA.Add(new A());
+                            }
+
+                            private class A
+                            {
+                                static A()
+                                {
+                                    EmbeddedAssemblyLoader.Register();
+                                    Thread.Sleep(500);
+                                }
                             }
                         }
                     }";
