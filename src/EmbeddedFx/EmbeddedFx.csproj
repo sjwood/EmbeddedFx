@@ -15,17 +15,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
   <Import Project="$(MSBuildThisFileDirectory)..\Common.props" />
+  
   <PropertyGroup>
     <AssemblyName>EmbeddedFx</AssemblyName>
     <OutputType>Library</OutputType>
     <ProjectGuid>{A4EC885A-267D-4F52-BFFA-1C2C75DE7792}</ProjectGuid>
   </PropertyGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Dependent.props" />
+  
+  <ItemGroup>
+    <MandatoryProperties Include="MonoCecilDirectory">
+      <InProject>false</InProject>
+    </MandatoryProperties>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="Mono.Cecil">
+      <HintPath>$(MonoCecilDirectory)lib\net20\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="$(MonoCecilDirectory)lib\net20\Mono.Cecil.dll">
+      <Link>Mono.Cecil.dll</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)AssemblyInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EmbeddedAssemblyFinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EmbeddedAssemblyLoader.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EmbeddedResource.cs" />
   </ItemGroup>
+  
   <Import Project="$(MSBuildThisFileDirectory)..\Common.targets" />
+  
 </Project>

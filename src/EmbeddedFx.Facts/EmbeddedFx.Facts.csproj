@@ -44,7 +44,7 @@ limitations under the License.
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="xunit">
+    <Reference Include="Xunit">
       <HintPath>$(XunitDirectory)xunit.dll</HintPath>
     </Reference>
   </ItemGroup>

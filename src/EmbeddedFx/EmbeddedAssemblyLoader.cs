@@ -18,16 +18,15 @@
 namespace EmbeddedFx
 {
     using System;
-    using System.Collections.Generic;
     using System.Reflection;
 
     public static class EmbeddedAssemblyLoader
     {
-        private static readonly object Padlock;
+        private static readonly object SynchronisationLock;
 
         static EmbeddedAssemblyLoader()
         {
-            EmbeddedAssemblyLoader.Padlock = new object();
+            EmbeddedAssemblyLoader.SynchronisationLock = new object();
             EmbeddedAssemblyLoader.AlreadyRegistered = false;
         }
 
@@ -35,7 +34,7 @@ namespace EmbeddedFx
 
         public static void Register()
         {
-            lock (EmbeddedAssemblyLoader.Padlock)
+            lock (EmbeddedAssemblyLoader.SynchronisationLock)
             {
                 if (EmbeddedAssemblyLoader.AlreadyRegistered)
                 {
@@ -50,49 +49,9 @@ namespace EmbeddedFx
 
         private static Assembly AssemblyResolveEventHandler(object sender, ResolveEventArgs args)
         {
-            var appDomainAssemblies = (sender as AppDomain).GetAssemblies();
+            var finder = new EmbeddedAssemblyFinder(sender as AppDomain);
 
-            var embeddedResources = EmbeddedAssemblyLoader.GetAllEmbeddedResources(appDomainAssemblies);
-
-            //// TODO
-            //// inspect the embedded resources to find the required assembly
-
-            return null;
-        }
-
-        private static IEnumerable<EmbeddedResource> GetAllEmbeddedResources(IEnumerable<Assembly> assemblies)
-        {
-            foreach (var assembly in assemblies)
-            {
-                foreach (var embeddedResource in EmbeddedAssemblyLoader.GetEmbeddedResources(assembly))
-                {
-                    yield return embeddedResource;
-                }
-            }
-        }
-
-        private static IEnumerable<EmbeddedResource> GetEmbeddedResources(Assembly assembly)
-        {
-            foreach (var resourceName in assembly.GetManifestResourceNames())
-            {
-                if (EmbeddedAssemblyLoader.IsEmbeddedResource(assembly, resourceName))
-                {
-                    yield return new EmbeddedResource(assembly, resourceName);
-                }
-            }
-        }
-
-        private static bool HasFlag(ResourceLocation flag, ResourceLocation value)
-        {
-            return (value & flag) == flag;
-        }
-
-        private static bool IsEmbeddedResource(Assembly assembly, string resourceName)
-        {
-            var resourceLocation = assembly.GetManifestResourceInfo(resourceName).ResourceLocation;
-
-            return EmbeddedAssemblyLoader.HasFlag(ResourceLocation.Embedded, resourceLocation)
-                && EmbeddedAssemblyLoader.HasFlag(ResourceLocation.ContainedInManifestFile, resourceLocation);
+            return finder.Find(new AssemblyName(args.Name));
         }
     }
 }

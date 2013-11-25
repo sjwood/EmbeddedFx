@@ -231,7 +231,7 @@ namespace EmbeddedFx.Facts
                 GivenAnEmbeddedAssemblyLoader.ExecuteTestInsideTestAppDomain(testSetup);
             }
 
-            [Fact(Skip = "Implementation missing in EmbeddedAssemblyLoader")]
+            [Fact]
             [Trait("Assembly", "EmbeddedFx")]
             public void AndRefersToATypeThatIsEmbeddedAsAResourceThenEmbeddedResourceAssemblyShouldBeLoadedIntoAppDomain()
             {
@@ -295,7 +295,7 @@ namespace EmbeddedFx.Facts
                 GivenAnEmbeddedAssemblyLoader.ExecuteTestInsideTestAppDomain(testSetup);
             }
 
-            [Fact(Skip = "Implementation missing in EmbeddedAssemblyLoader")]
+            [Fact]
             [Trait("Assembly", "EmbeddedFx")]
             public void AndRefersToATypeThatIsEmbeddedAsANestedEmbeddedResourceThenEmbeddedResourceAssemblyShouldBeLoadedIntoAppDomain()
             {
@@ -360,7 +360,7 @@ namespace EmbeddedFx.Facts
                         // assert
                         var libraryBinaryAssemblyName = AssemblyName.GetAssemblyName(libraryBinary.FullName);
                         GivenAnEmbeddedAssemblyLoader.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, libraryBinaryAssemblyName);
-                        GivenAnEmbeddedAssemblyLoader.AssertAppDomainHasLoadedAssemblyName(true, ts.TestAppDomain, libraryBinaryAssemblyName);
+                        GivenAnEmbeddedAssemblyLoader.AssertAppDomainHasLoadedAssemblyName(false, ts.TestAppDomain, libraryBinaryAssemblyName);
 
                         var nestedLibraryBinaryAssemblyName = AssemblyName.GetAssemblyName(nestedLibraryBinary.FullName);
                         GivenAnEmbeddedAssemblyLoader.AssertAppDomainHasLoadedAssemblyName(false, ts.ParentAppDomain, nestedLibraryBinaryAssemblyName);
