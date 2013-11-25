@@ -154,7 +154,9 @@ Task GenerateBuildProperties -Description "Generates build properties calculated
 
         if ($CurrentVersionDirectoryInfo -ne $Null)
         {
-            $Global:BuildProperties += ,(("{0}Directory" -f $LibDirectoryInfo.Name), ("{0}{1}" -f $CurrentVersionDirectoryInfo.FullName, $Global:DirectorySeparator))
+            $Name = ("{0}Directory" -f (SanitisePropertyName($LibDirectoryInfo.Name)))
+            $Value = ("{0}{1}" -f $CurrentVersionDirectoryInfo.FullName, $Global:DirectorySeparator)
+            $Global:BuildProperties += ,($Name, $Value)
         }
     }
 
@@ -340,7 +342,7 @@ Task Test -Depends Build -Description "Runs all tests." {
 }
 
 
-function IsValueInSet([string] $Value, [string[]] $Set)
+function IsValueInSet([System.String] $Value, [System.String[]] $Set)
 {
     foreach ($SetItem in $Set)
     {
@@ -350,4 +352,10 @@ function IsValueInSet([string] $Value, [string[]] $Set)
         }
     }
     return $False
+}
+
+
+function SanitisePropertyName([System.String] $Name)
+{
+    return $Name.Replace(".", [System.String]::Empty)
 }
