@@ -41,7 +41,7 @@ $Global:AllowedPlatforms = "Any CPU"
 Framework "4.0"
 
 
-Task default -Depends Test
+Task default -Depends Build, Test
 
 
 Task Help -Description "Displays information on the Tasks in this build file." {
@@ -251,7 +251,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
     foreach ($SolutionFileInfo in $SolutionDirectoryInfo.GetFiles("*.sln", [System.IO.SearchOption]::TopDirectoryOnly))
     {
         Write-Output ("  Building solution '" + $SolutionFileInfo.FullName + "'")
-        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:$MSBuildVerbosity /maxcpucount /nodereuse:false /property:Configuration=$Configuration /property:Platform=$Platform
+        MsBuild $SolutionFileInfo.FullName /nologo /verbosity:$MSBuildVerbosity /property:Configuration=$Configuration /property:Platform=$Platform
         if ($LastExitCode -ne 0)
         {
             Exit 1
@@ -260,7 +260,7 @@ Task Build -Depends ValidateScriptProperties, Clean, CreateMSBuildPropertyFileFr
 }
 
 
-Task Test -Depends Build -Description "Runs all tests." {
+Task Test -Depends CreatePowershellPropertiesFromBuildProperties -Description "Runs all tests." {
     $XunitConsoleExe = "{0}xunit.console.exe" -f $XunitDirectory
     $TestDirectoryInfo = New-Object System.IO.DirectoryInfo -ArgumentList $BinDirectory
 
